@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "@react-native-community",
+    "plugin:react-hooks/recommended",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-shadow": ["error"],
+        "no-shadow": "off",
+        "no-undef": "off"
+      }
+    }
+  ],
+  "rules": {
+    "comma-dangle": "off",
+    "semi": "off",
+    "max-len": ["warn", 80],
+    "no-param-reassign": "error",
+    "no-duplicate-imports": "warn",
+    "spaced-comment": "warn",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-extra-semi": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "curly": "off",
+    "no-var": "error",
+    "no-void": "off"
+  }
+}
