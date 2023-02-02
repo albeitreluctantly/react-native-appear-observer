@@ -1,9 +1,8 @@
-import { RefObject } from 'react'
-import { VoidCallback } from '../core'
+import { AnyElementRef, VoidCallback } from '../core'
 
 export interface AppearObserverProps {
-  elementRef: RefObject<any>
-  parentRef?: RefObject<any>
+  elementRef: AnyElementRef
+  parentRef?: AnyElementRef
   onAppear?: VoidCallback
   onDisappear?: VoidCallback
   options?: AppearObserverOptions
@@ -16,5 +15,5 @@ export interface AppearObserverOptions {
 }
 
 export interface ObserverStateHandlerProps {
-  readonly elementRef: RefObject<any>
+  readonly elementRef: AnyElementRef
 }

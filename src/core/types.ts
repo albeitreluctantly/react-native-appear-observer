@@ -18,4 +18,4 @@ export type VoidCallback = () => void
 
 export type AnyElement = object
 
-export type ElementRef = RefObject<AnyElement>
+export type AnyElementRef = RefObject<AnyElement>
