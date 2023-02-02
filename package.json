@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/albeitereluctantly/react-native-appear-observer"
+    "url": "git+https://github.com/albeitereluctantly/react-native-appear-observer.git"
   },
   "keywords": [
     "React",
