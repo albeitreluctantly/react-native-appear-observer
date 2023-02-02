@@ -53,3 +53,7 @@ const TestView = () => {
   )
 }
 ```
+
+<h2>Known issues</h2>
+- Observing stops is horizontal lists on Android if provider is attached to parent vertical scroll view and scrolling is performed
+  holding screen with one finger and moving another
