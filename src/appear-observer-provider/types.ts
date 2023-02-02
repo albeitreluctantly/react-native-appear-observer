@@ -1,13 +1,13 @@
-import { RefObject } from 'react'
-import { AnyReactNativeElement, VoidCallback } from '../core'
+import { AnyElementRef, VoidCallback } from '../core'
 
 export interface AppearObserverProviderProps {
-  readonly parentRef: RefObject<AnyReactNativeElement>
+  readonly parentRef: AnyElementRef
   readonly enableInteractionMode?: boolean
 }
 
 export interface AppearObserverProviderValue {
-  readonly parentRef: RefObject<AnyReactNativeElement>
+  readonly parentRef: AnyElementRef
   readonly interactionModeEnabled: boolean
-  readonly onInteraction: (callback: VoidCallback) => VoidCallback
+  readonly onInteractionStart: (callback: VoidCallback) => VoidCallback
+  readonly onInteractionEnd: (callback: VoidCallback) => VoidCallback
 }

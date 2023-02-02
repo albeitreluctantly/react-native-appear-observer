@@ -1,11 +1,4 @@
-import {
-  FlatList,
-  ScrollView,
-  SectionList,
-  TextInput,
-  View,
-  Image
-} from 'react-native'
+import { RefObject } from 'react'
 
 export interface ElementBoundaries {
   readonly top: number
@@ -21,13 +14,8 @@ export interface ElementMeasurements {
   readonly height: number
 }
 
-export type AnyReactNativeElement =
-  | View
-  | ScrollView
-  | FlatList
-  | SectionList
-  | Text
-  | TextInput
-  | Image
-
 export type VoidCallback = () => void
+
+export type AnyElement = object
+
+export type ElementRef = RefObject<AnyElement>

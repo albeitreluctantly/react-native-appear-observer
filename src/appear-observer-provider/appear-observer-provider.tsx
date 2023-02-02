@@ -1,13 +1,15 @@
 import {
+  Children,
+  cloneElement,
   createContext,
   createRef,
+  isValidElement,
   PropsWithChildren,
   useCallback,
   useContext,
   useMemo,
   useRef
 } from 'react'
-import { PanResponder, View } from 'react-native'
 import { noop, VoidCallback } from '../core'
 import {
   AppearObserverProviderProps,
@@ -18,7 +20,8 @@ export const AppearObserverContext = createContext<AppearObserverProviderValue>(
   {
     parentRef: createRef(),
     interactionModeEnabled: false,
-    onInteraction: () => noop
+    onInteractionStart: () => noop,
+    onInteractionEnd: () => noop
   }
 )
 
@@ -27,48 +30,70 @@ export const AppearObserverProvider = ({
   enableInteractionMode = true,
   children
 }: PropsWithChildren<AppearObserverProviderProps>) => {
-  const interactionListeners = useRef(new Set<VoidCallback>()).current
+  const interactionStartListeners = useRef(new Set<VoidCallback>()).current
+  const interactionEndListeners = useRef(new Set<VoidCallback>()).current
 
-  const onPanResponderCapture = useCallback(() => {
-    if (interactionListeners.size) {
-      interactionListeners.forEach(listener => listener())
-    }
-    return false
-  }, [interactionListeners])
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: () => false,
-      onShouldBlockNativeResponder: () => false,
-      onStartShouldSetPanResponderCapture: onPanResponderCapture,
-      onMoveShouldSetPanResponderCapture: onPanResponderCapture
-    })
-  ).current
-
-  const onInteraction = useCallback(
+  const onInteractionStart = useCallback(
     (callback: VoidCallback) => {
-      interactionListeners.add(callback)
+      interactionStartListeners.add(callback)
 
-      return () => interactionListeners.delete(callback)
+      return () => interactionStartListeners.delete(callback)
     },
-    [interactionListeners]
+    [interactionStartListeners]
   )
 
-  const value: AppearObserverProviderValue = useMemo(
+  const onInteractionEnd = useCallback(
+    (callback: VoidCallback) => {
+      interactionEndListeners.add(callback)
+
+      return () => interactionEndListeners.delete(callback)
+    },
+    [interactionEndListeners]
+  )
+
+  const runInteractionStartListeners = useCallback(() => {
+    if (interactionStartListeners.size) {
+      interactionStartListeners.forEach(listener => listener())
+    }
+  }, [interactionStartListeners])
+
+  const runInteractionEndListeners = useCallback(() => {
+    if (interactionEndListeners.size) {
+      interactionEndListeners.forEach(listener => listener())
+    }
+  }, [interactionEndListeners])
+
+  const interactionHandlers = useMemo(
     () => ({
-      parentRef,
-      interactionModeEnabled: enableInteractionMode,
-      onInteraction
+      onScrollBeginDrag: runInteractionStartListeners,
+      onScrollEndDrag: runInteractionEndListeners,
+      onTouchStart: runInteractionStartListeners,
+      onTouchEnd: runInteractionEndListeners,
+      onTouchMove: runInteractionStartListeners,
+      onTouchCancel: runInteractionEndListeners
     }),
-    [enableInteractionMode, onInteraction, parentRef]
+    [runInteractionStartListeners, runInteractionEndListeners]
   )
 
   let childComponent = children
 
   if (enableInteractionMode) {
-    childComponent = <View {...panResponder.panHandlers}>{children}</View>
+    const child = Children.only(children)
+
+    if (isValidElement(child)) {
+      childComponent = cloneElement(child, interactionHandlers)
+    }
   }
+
+  const value: AppearObserverProviderValue = useMemo(
+    () => ({
+      parentRef,
+      interactionModeEnabled: enableInteractionMode,
+      onInteractionStart,
+      onInteractionEnd
+    }),
+    [enableInteractionMode, onInteractionStart, onInteractionEnd, parentRef]
+  )
 
   return (
     <AppearObserverContext.Provider value={value}>

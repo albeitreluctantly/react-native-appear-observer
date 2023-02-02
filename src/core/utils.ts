@@ -1,8 +1,10 @@
+import { DependencyList, useRef } from 'react'
 import { View } from 'react-native'
 import {
-  AnyReactNativeElement,
+  AnyElement,
   ElementBoundaries,
-  ElementMeasurements
+  ElementMeasurements,
+  VoidCallback
 } from './types'
 
 export const noop = () => void null
@@ -38,19 +40,15 @@ export const elementHasZeroSize = (elementMeasures: ElementMeasurements) => {
 // React native element refs actually contain measure props
 // like measureInWindow, but it's not reflected in types
 export const measureInWindow = (
-  element: AnyReactNativeElement | undefined | null
+  element: AnyElement | null
 ): Promise<ElementMeasurements> => {
   return new Promise(resolve => {
-    if (element && 'measureInWindow' in element) {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;(element as View).measureInWindow((x, y, width, height) => {
-          resolve({ x, y, width, height })
-        })
-      } catch (e) {
-        resolve(fallbackMeasurements)
-      }
-    } else {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-extra-semi
+      ;(element as View).measureInWindow((x, y, width, height) => {
+        resolve({ x, y, width, height })
+      })
+    } catch (e) {
       resolve(fallbackMeasurements)
     }
   })
@@ -67,7 +65,7 @@ export const isAsyncIterable = (value: unknown) => {
   return Symbol.asyncIterator in Object(value)
 }
 
-const iterateAsyncIterable = async <T>(
+export const iterateAsyncIterable = async <T>(
   generator: AsyncIterableIterator<T>,
   handler: (value: T) => void,
   stopper?: { stop: boolean }
@@ -76,6 +74,7 @@ const iterateAsyncIterable = async <T>(
 
   const stoppableHandler = (value: T) => {
     if (stopper?.stop) return
+
     handler(value)
   }
 
@@ -84,13 +83,16 @@ const iterateAsyncIterable = async <T>(
       generatorIsDone = true
       return
     }
+
     const { value, done } = await generator.next()
 
-    if (isAsyncIterable(value)) {
-      await iterateAsyncIterable(value, stoppableHandler, stopper)
+    if (!(done && value === undefined)) {
+      if (isAsyncIterable(value)) {
+        await iterateAsyncIterable(value, stoppableHandler, stopper)
+      } else {
+        stoppableHandler(value)
+      }
     }
-
-    stoppableHandler(value)
 
     generatorIsDone = Boolean(done)
   }
@@ -101,6 +103,7 @@ export const listenIterable = <T>(
   handler: (value: T) => void
 ) => {
   const stopper = { stop: false }
+
   iterateAsyncIterable(generator, handler, stopper)
 
   return () => {
@@ -110,3 +113,25 @@ export const listenIterable = <T>(
 
 export const delay = (duration: number) =>
   new Promise<void>(resolve => setTimeout(resolve, duration))
+
+const shallowCompareArrays = <T extends Array<any> | ReadonlyArray<any>>(
+  value1: T,
+  value2: T
+) => {
+  return (
+    value1.length === value2.length &&
+    value1.every((element, index) => element === value2[index])
+  )
+}
+
+export const useImmediateEffect = (
+  callback: VoidCallback,
+  deps: DependencyList
+) => {
+  const previousDeps = useRef(deps)
+
+  if (!shallowCompareArrays(deps, previousDeps.current)) {
+    previousDeps.current = deps
+    callback()
+  }
+}
