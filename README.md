@@ -58,11 +58,13 @@ const TestView = ({ onAppear, onDisappear }: any) => {
 
 
 <h2>Options</h2>
-| Option | Description | Default |
-|---|---|---|---|
-| visibilityThreshold | Defines what part of an element should be visible for it to trigger callback, from 0 to 1.  | 0 |
-| intervalDelay | Determines a delay in milliseconds between visibility check repetitions.  | 100 |
-| recalculateParentBoundaries | Tells if observer should measure parent element boundaries on every on every check or measure once and cache. | false |
+Inputs
+
+| Option | Description | Default value |
+|---|---|---|
+| *visibilityThreshold* | Defines what part of an element should be visible for it to trigger callback, from 0 to 1. | 0 |
+| *intervalDelay* | Determines a delay in milliseconds between visibility check repetitions. | 100 |
+| *recalculateParentBoundaries* | Tells whether observer should measure parent element boundaries on every on every check or measure once and cache. | false |
 
 <h2>Known issues</h2>
 - Observing stops in horizontal lists on Android if provider is attached to parent vertical scroll view and scrolling is performed
