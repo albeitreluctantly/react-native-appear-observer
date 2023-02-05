@@ -1,6 +1,6 @@
 {
   "name": "react-native-appear-observer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utility to check React Native node visibility on the screen.",
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/albeitereluctantly/react-native-appear-observer.git"
+    "url": "git+https://github.com/albeitreluctantly/react-native-appear-observer.git"
   },
   "keywords": [
     "React",
@@ -23,9 +23,9 @@
   "author": "Andrii Syzov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/albeitereluctantly/react-native-appear-observer/issues"
+    "url": "https://github.com/albeitreluctantly/react-native-appear-observer/issues"
   },
-  "homepage": "https://github.com/albeitereluctantly/react-native-appear-observer#readme",
+  "homepage": "https://github.com/albeitreluctantly/react-native-appear-observer#readme",
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
