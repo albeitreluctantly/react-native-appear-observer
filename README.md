@@ -74,5 +74,6 @@ const TestView = ({ onAppear, onDisappear }: any) => {
 | *enableInteractionMode* | If true, the touch handlers are attached to child view of context provider and observer runs checks only upon interactions, which could affect element visibility - touch move or scroll, stopping them on after a period of inactivity. If false, checks will run permanently. | true |
 
 <h2>Known issues</h2>
-- Observing stops in horizontal lists on Android if provider is attached to parent vertical scroll view and scrolling is performed
-  holding screen with one finger and moving another
+
+- Observing stops in horizontal lists on Android if provider is attached to parent vertical scroll view and scrolling is performed by
+  holding screen with one finger and moving with another.
