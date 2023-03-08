@@ -1,20 +1,21 @@
-import {
-  ElementBoundaries,
-  createElementBoundaries,
-  listenIterable,
-  measureInWindow,
-  delay,
-  elementHasZeroSize,
-  elementIntersectsWithParent
-} from '../core'
 import { useCallback, useEffect, useRef } from 'react'
-import { AppearObserverProps } from './types'
 import { useAppearObserverProvider } from '../appear-observer-provider'
-import { useObserverStateHandler } from './use-observer-state-handler'
+import {
+  createElementBoundaries,
+  delay,
+  ElementBoundaries,
+  elementHasZeroSize,
+  elementIntersectsWithParent,
+  listenIterable,
+  measureInWindow
+} from '../core'
+import { AppearObserverProps } from './types'
 import { useObserverOptions } from './use-observer-options'
+import { useObserverStateHandler } from './use-observer-state-handler'
 
 export const useAppearObserver = ({
   elementRef,
+  parentRef: parentRefProp,
   onAppear,
   onDisappear,
   options
@@ -22,7 +23,9 @@ export const useAppearObserver = ({
   const { visibilityThreshold, recalculateParentBoundaries, intervalDelay } =
     useObserverOptions(options)
 
-  const { parentRef } = useAppearObserverProvider()
+  const { parentRef: parentRefContext } = useAppearObserverProvider()
+
+  const parentRef = parentRefProp || parentRefContext
 
   const { isObserving, onVisibilityChange } = useObserverStateHandler({
     elementRef

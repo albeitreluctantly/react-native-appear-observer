@@ -3,10 +3,25 @@ import { AnyElementRef } from '../core'
 import { AppearObserverOptions } from './types'
 import { useAppearObserver } from './use-appear-observer'
 
-export const useIsAppeared = (
+export function useIsAppeared(
+  elementRef: AnyElementRef,
+  parentRef?: AnyElementRef
+): boolean
+export function useIsAppeared(
   elementRef: AnyElementRef,
   options?: AppearObserverOptions
-) => {
+): boolean
+export function useIsAppeared(
+  elementRef: AnyElementRef,
+  parentRef?: AnyElementRef,
+  options?: AppearObserverOptions
+): boolean
+
+export function useIsAppeared(
+  elementRef: AnyElementRef,
+  parentRefOrOptions?: AnyElementRef | AppearObserverOptions,
+  options?: AppearObserverOptions
+) {
   const [isAppeared, setIsAppeared] = useState(false)
 
   const onAppear = useCallback(() => {
@@ -17,7 +32,22 @@ export const useIsAppeared = (
     setIsAppeared(false)
   }, [])
 
-  useAppearObserver({ elementRef, onAppear, onDisappear, options })
+  const parentRef =
+    parentRefOrOptions && 'current' in parentRefOrOptions
+      ? parentRefOrOptions
+      : undefined
+
+  useAppearObserver({
+    elementRef,
+    parentRef,
+    onAppear,
+    onDisappear,
+    options:
+      options ||
+      (parentRef === undefined
+        ? (parentRefOrOptions as AppearObserverOptions)
+        : undefined)
+  })
 
   return isAppeared
 }
