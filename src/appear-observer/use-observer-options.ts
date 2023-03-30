@@ -10,5 +10,7 @@ export const useObserverOptions = (
 const defaultOptions: Required<AppearObserverOptions> = {
   visibilityThreshold: 0,
   intervalDelay: 50,
-  recalculateParentBoundaries: true
+  recalculateParentBoundaries: true,
+  enabled: true,
+  detectOnce: false
 }

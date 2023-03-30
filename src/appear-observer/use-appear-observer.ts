@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useAppearObserverProvider } from '../appear-observer-provider'
 import {
   createElementBoundaries,
@@ -20,8 +20,13 @@ export const useAppearObserver = ({
   onDisappear,
   options
 }: AppearObserverProps) => {
-  const { visibilityThreshold, recalculateParentBoundaries, intervalDelay } =
-    useObserverOptions(options)
+  const {
+    visibilityThreshold,
+    recalculateParentBoundaries,
+    intervalDelay,
+    enabled,
+    detectOnce
+  } = useObserverOptions(options)
 
   const { parentRef: parentRefContext } = useAppearObserverProvider()
 
@@ -95,7 +100,15 @@ export const useAppearObserver = ({
     ]
   )
 
+  const reset = useCallback(() => {
+    elementIsCurrentlyVisible.current = false
+    currentParentBoundaries.current = undefined
+    resetState()
+  }, [resetState])
+
   useEffect(() => {
+    if (!enabled) return
+
     const stopObserving = listenIterable(
       observeElementVisibility(),
       elementIsVisible => {
@@ -104,6 +117,9 @@ export const useAppearObserver = ({
 
           if (elementIsVisible) {
             onAppear?.()
+            if (detectOnce) {
+              reset()
+            }
           } else {
             onDisappear?.()
           }
@@ -114,13 +130,21 @@ export const useAppearObserver = ({
     )
 
     return () => stopObserving()
-  }, [observeElementVisibility, onAppear, onDisappear, onVisibilityChange])
+  }, [
+    observeElementVisibility,
+    onAppear,
+    onDisappear,
+    onVisibilityChange,
+    enabled,
+    detectOnce,
+    reset
+  ])
 
-  const reset = useCallback(() => {
-    elementIsCurrentlyVisible.current = false
-    currentParentBoundaries.current = undefined
-    resetState()
-  }, [resetState])
+  useLayoutEffect(() => {
+    if (!enabled) {
+      reset()
+    }
+  }, [enabled, reset])
 
   return {
     reset

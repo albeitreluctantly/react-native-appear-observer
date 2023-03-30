@@ -1,6 +1,6 @@
 {
   "name": "react-native-appear-observer",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Utility to check React Native node visibility on the screen.",
   "main": "src/index.ts",
   "types": "src/index.ts",

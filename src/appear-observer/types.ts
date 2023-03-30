@@ -12,6 +12,8 @@ export interface AppearObserverOptions {
   visibilityThreshold?: number
   intervalDelay?: number
   recalculateParentBoundaries?: boolean
+  enabled?: boolean
+  detectOnce?: boolean
 }
 
 export interface ObserverStateHandlerProps {
