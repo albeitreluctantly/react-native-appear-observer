@@ -16,9 +16,9 @@ export const createElementBoundaries = ({
   height
 }: ElementMeasurements): ElementBoundaries => ({
   top: y,
-  right: x,
+  right: x + width,
   bottom: y + height,
-  left: x + width
+  left: x
 })
 
 export const elementIntersectsWithParent = (
@@ -28,8 +28,8 @@ export const elementIntersectsWithParent = (
   return (
     elementBoundaries.top <= parentBoundaries.bottom &&
     elementBoundaries.bottom >= parentBoundaries.top &&
-    elementBoundaries.right <= parentBoundaries.left &&
-    elementBoundaries.left >= parentBoundaries.right
+    elementBoundaries.left <= parentBoundaries.right &&
+    elementBoundaries.right >= parentBoundaries.left
   )
 }
 
