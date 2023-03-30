@@ -27,9 +27,10 @@ export const useAppearObserver = ({
 
   const parentRef = parentRefProp || parentRefContext
 
-  const { isObserving, onVisibilityChange } = useObserverStateHandler({
-    elementRef
-  })
+  const { isObserving, onVisibilityChange, resetState } =
+    useObserverStateHandler({
+      elementRef
+    })
 
   const currentParentBoundaries = useRef<ElementBoundaries | undefined>()
 
@@ -114,4 +115,14 @@ export const useAppearObserver = ({
 
     return () => stopObserving()
   }, [observeElementVisibility, onAppear, onDisappear, onVisibilityChange])
+
+  const reset = useCallback(() => {
+    elementIsCurrentlyVisible.current = false
+    currentParentBoundaries.current = undefined
+    resetState()
+  }, [resetState])
+
+  return {
+    reset
+  }
 }

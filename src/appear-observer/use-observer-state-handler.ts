@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppearObserverProvider } from '../appear-observer-provider'
 import { useImmediateEffect } from '../core'
 import { ObserverStateHandlerProps } from './types'
@@ -23,11 +23,15 @@ export const useObserverStateHandler = ({
     idleModeTimeout.current && clearTimeout(idleModeTimeout.current)
   }, [])
 
-  useImmediateEffect(() => {
+  const resetState = useCallback(() => {
     resetTimeout()
     isInitialMeasurement.current = true
     setIsObserving(Boolean(parentRef))
-  }, [interactionModeEnabled, parentRef, elementRef, resetTimeout])
+  }, [parentRef, resetTimeout])
+
+  useImmediateEffect(() => {
+    resetState()
+  }, [interactionModeEnabled, parentRef, elementRef])
 
   useEffect(() => {
     if (interactionModeEnabled) {
@@ -67,6 +71,7 @@ export const useObserverStateHandler = ({
 
   return {
     isObserving,
-    onVisibilityChange
+    onVisibilityChange,
+    resetState
   }
 }
