@@ -4,14 +4,11 @@ import { useImmediateEffect } from '../core'
 import { ObserverStateHandlerProps } from './types'
 
 export const useObserverStateHandler = ({
-  elementRef
+  elementRef,
+  parentRef
 }: ObserverStateHandlerProps) => {
-  const {
-    parentRef,
-    interactionModeEnabled,
-    onInteractionStart,
-    onInteractionEnd
-  } = useAppearObserverProvider()
+  const { interactionModeEnabled, onInteractionStart, onInteractionEnd } =
+    useAppearObserverProvider()
 
   const [isObserving, setIsObserving] = useState(Boolean(parentRef))
 

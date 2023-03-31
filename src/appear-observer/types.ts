@@ -13,9 +13,9 @@ export interface AppearObserverOptions {
   intervalDelay?: number
   recalculateParentBoundaries?: boolean
   enabled?: boolean
-  detectOnce?: boolean
 }
 
 export interface ObserverStateHandlerProps {
   readonly elementRef: AnyElementRef
+  readonly parentRef: AnyElementRef
 }
