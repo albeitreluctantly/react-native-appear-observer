@@ -40,14 +40,16 @@ export const elementHasZeroSize = (elementMeasures: ElementMeasurements) => {
 // React native element refs actually contain measure props
 // like measureInWindow, but it's not reflected in types
 export const measureInWindow = (
-  element: AnyElement | null
+  element: AnyElement | undefined | null
 ): Promise<ElementMeasurements> => {
   return new Promise(resolve => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-extra-semi
-      ;(element as View).measureInWindow((x, y, width, height) => {
-        resolve({ x, y, width, height })
-      })
+      ;(element as View).measureInWindow(
+        (x = 0, y = 0, width = 0, height = 0) => {
+          resolve({ x, y, width, height })
+        }
+      )
     } catch (e) {
       resolve(fallbackMeasurements)
     }
@@ -135,3 +137,9 @@ export const useImmediateReaction = (
     callback()
   }
 }
+
+const getClass = {}.toString
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const isFunction = (value: unknown): value is Function =>
+  Boolean(value) && getClass.call(value) === '[object Function]'

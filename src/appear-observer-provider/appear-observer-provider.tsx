@@ -2,23 +2,22 @@ import {
   Children,
   cloneElement,
   createContext,
-  createRef,
   isValidElement,
-  PropsWithChildren,
   useCallback,
   useContext,
   useMemo,
   useRef
 } from 'react'
-import { noop, VoidCallback } from '../core'
+import { VoidCallback, isFunction, noop } from '../core'
 import {
   AppearObserverProviderProps,
-  AppearObserverProviderValue
+  AppearObserverProviderValue,
+  AvailableProps
 } from './types'
 
 export const AppearObserverContext = createContext<AppearObserverProviderValue>(
   {
-    parentRef: createRef(),
+    parentRef: undefined,
     interactionModeEnabled: false,
     onInteractionStart: () => noop,
     onInteractionEnd: () => noop
@@ -28,8 +27,18 @@ export const AppearObserverContext = createContext<AppearObserverProviderValue>(
 export const AppearObserverProvider = ({
   parentRef,
   enableInteractionMode = true,
-  children
-}: PropsWithChildren<AppearObserverProviderProps>) => {
+  onScroll,
+  onScrollBeginDrag,
+  onScrollEndDrag,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onTouchCancel,
+  children,
+  // Fixes for android
+  onLayout = noop,
+  collapsable = false
+}: AppearObserverProviderProps) => {
   const interactionStartListeners = useRef(new Set<VoidCallback>()).current
   const interactionEndListeners = useRef(new Set<VoidCallback>()).current
 
@@ -63,25 +72,72 @@ export const AppearObserverProvider = ({
     }
   }, [interactionEndListeners])
 
-  const interactionHandlers = useMemo(
+  const interactionProps: AvailableProps = useMemo(
     () => ({
-      onScrollBeginDrag: runInteractionStartListeners,
-      onScrollEndDrag: runInteractionEndListeners,
-      onTouchStart: runInteractionStartListeners,
-      onTouchEnd: runInteractionEndListeners,
-      onTouchMove: runInteractionStartListeners,
-      onTouchCancel: runInteractionEndListeners
+      onScroll: event => {
+        runInteractionStartListeners()
+        onScroll?.(event)
+      },
+      onScrollBeginDrag: event => {
+        runInteractionStartListeners()
+        onScrollBeginDrag?.(event)
+      },
+      onTouchStart: event => {
+        runInteractionStartListeners()
+        onTouchStart?.(event)
+      },
+      onTouchMove: event => {
+        runInteractionStartListeners()
+        onTouchMove?.(event)
+      },
+
+      onScrollEndDrag: event => {
+        runInteractionEndListeners()
+        onScrollEndDrag?.(event)
+      },
+      onTouchEnd: event => {
+        runInteractionEndListeners()
+        onTouchEnd?.(event)
+      },
+      onTouchCancel: event => {
+        runInteractionEndListeners()
+        onTouchCancel?.(event)
+      },
+      onLayout,
+      collapsable
     }),
-    [runInteractionStartListeners, runInteractionEndListeners]
+    [
+      runInteractionStartListeners,
+      onScroll,
+      onScrollBeginDrag,
+      onTouchStart,
+      onTouchMove,
+      runInteractionEndListeners,
+      onScrollEndDrag,
+      onTouchEnd,
+      onTouchCancel,
+      onLayout,
+      collapsable
+    ]
   )
+
+  const props = enableInteractionMode
+    ? interactionProps
+    : { onLayout, collapsable }
 
   let childComponent = children
 
-  if (enableInteractionMode) {
+  if (isFunction(childComponent)) {
+    childComponent = childComponent(
+      props,
+      runInteractionStartListeners,
+      runInteractionEndListeners
+    )
+  } else {
     const child = Children.only(children)
 
     if (isValidElement(child)) {
-      childComponent = cloneElement(child, interactionHandlers)
+      childComponent = cloneElement(child, props)
     }
   }
 
