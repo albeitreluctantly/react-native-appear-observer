@@ -43,7 +43,7 @@ export const useAppearObserver = ({
   })
 
   const restartObserver = useCallback(
-    (isActive: boolean) => {
+    (isActive = true) => {
       elementIsCurrentlyVisible.current = false
       currentParentBoundaries.current = undefined
       resetStateHandler()
