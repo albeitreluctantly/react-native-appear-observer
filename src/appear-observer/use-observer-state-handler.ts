@@ -1,16 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useAppearObserverProvider } from '../appear-observer-provider'
-import { useImmediateEffect } from '../core'
 import { ObserverStateHandlerProps } from './types'
 
 export const useObserverStateHandler = ({
-  elementRef,
-  parentRef
+  onStateUpdate
 }: ObserverStateHandlerProps) => {
   const { interactionModeEnabled, onInteractionStart, onInteractionEnd } =
     useAppearObserverProvider()
-
-  const [isObserving, setIsObserving] = useState(Boolean(parentRef))
 
   const isInitialMeasurement = useRef(true)
 
@@ -20,28 +16,23 @@ export const useObserverStateHandler = ({
     idleModeTimeout.current && clearTimeout(idleModeTimeout.current)
   }, [])
 
-  const resetState = useCallback(() => {
+  const resetStateHandler = useCallback(() => {
     resetTimeout()
     isInitialMeasurement.current = true
-    setIsObserving(Boolean(parentRef))
-  }, [parentRef, resetTimeout])
-
-  useImmediateEffect(() => {
-    resetState()
-  }, [interactionModeEnabled, parentRef, elementRef])
+  }, [resetTimeout])
 
   useEffect(() => {
     if (interactionModeEnabled) {
       const unsubscribeStart = onInteractionStart(() => {
         resetTimeout()
-        setIsObserving(true)
+        onStateUpdate(true)
       })
       const unsubscribeEnd = onInteractionEnd(() => {
         // Other interaction endings reset timeout started on previous ones
         // E.g. onMomentumScrollEnds resets timeout from onTouchEnd
         resetTimeout()
         idleModeTimeout.current = setTimeout(() => {
-          setIsObserving(false)
+          onStateUpdate(false)
         }, 5000)
       })
 
@@ -54,21 +45,21 @@ export const useObserverStateHandler = ({
     interactionModeEnabled,
     onInteractionStart,
     onInteractionEnd,
-    resetTimeout
+    resetTimeout,
+    onStateUpdate
   ])
 
   const onVisibilityChange = useCallback(() => {
     if (interactionModeEnabled) {
       if (isInitialMeasurement.current) {
-        setIsObserving(false)
+        onStateUpdate(false)
       }
       isInitialMeasurement.current = false
     }
-  }, [interactionModeEnabled])
+  }, [interactionModeEnabled, onStateUpdate])
 
   return {
-    isObserving,
     onVisibilityChange,
-    resetState
+    resetStateHandler
   }
 }

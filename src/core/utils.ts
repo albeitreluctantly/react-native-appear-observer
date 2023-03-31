@@ -124,7 +124,7 @@ const shallowCompareArrays = <T extends Array<any> | ReadonlyArray<any>>(
   )
 }
 
-export const useImmediateEffect = (
+export const useImmediateReaction = (
   callback: VoidCallback,
   deps: DependencyList
 ) => {

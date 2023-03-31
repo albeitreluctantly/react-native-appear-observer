@@ -1,19 +1,14 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppearObserverProvider } from '../appear-observer-provider'
 import {
+  ElementBoundaries,
   createElementBoundaries,
   delay,
-  ElementBoundaries,
   elementHasZeroSize,
   elementIntersectsWithParent,
   listenIterable,
-  measureInWindow
+  measureInWindow,
+  useImmediateReaction
 } from '../core'
 import { AppearObserverProps } from './types'
 import { useObserverOptions } from './use-observer-options'
@@ -33,15 +28,34 @@ export const useAppearObserver = ({
     enabled
   } = useObserverOptions(options)
 
-  const { parentRef: parentRefContext } = useAppearObserverProvider()
+  const { parentRef: parentRefContext, interactionModeEnabled } =
+    useAppearObserverProvider()
 
   const parentRef = parentRefProp || parentRefContext
 
-  const { isObserving, onVisibilityChange, resetState } =
-    useObserverStateHandler({
-      elementRef,
-      parentRef
-    })
+  const [isObserving, setIsObserving] = useState(enabled)
+
+  // TODO: Remove, implement proper solutuion
+  const [restartKey, setRestartKey] = useState(Math.random())
+
+  const { onVisibilityChange, resetStateHandler } = useObserverStateHandler({
+    onStateUpdate: setIsObserving
+  })
+
+  const restartObserver = useCallback(
+    (isActive: boolean) => {
+      elementIsCurrentlyVisible.current = false
+      currentParentBoundaries.current = undefined
+      resetStateHandler()
+      setIsObserving(isActive)
+      setRestartKey(Math.random())
+    },
+    [resetStateHandler]
+  )
+
+  useImmediateReaction(() => {
+    restartObserver(enabled)
+  }, [interactionModeEnabled, parentRef, elementRef, enabled])
 
   const currentParentBoundaries = useRef<ElementBoundaries | undefined>()
 
@@ -106,19 +120,7 @@ export const useAppearObserver = ({
     ]
   )
 
-  // TODO: Remove, implement proper solutuion
-  const [resetKey, setResetKey] = useState(Math.random())
-
-  const reset = useCallback(() => {
-    elementIsCurrentlyVisible.current = false
-    currentParentBoundaries.current = undefined
-    resetState()
-    setResetKey(Math.random())
-  }, [resetState])
-
   useEffect(() => {
-    if (!enabled) return
-
     const stopObserving = listenIterable(
       observeElementVisibility(),
       elementIsVisible => {
@@ -143,17 +145,10 @@ export const useAppearObserver = ({
     onDisappear,
     onVisibilityChange,
     enabled,
-    reset,
-    resetKey
+    restartKey
   ])
 
-  useLayoutEffect(() => {
-    if (!enabled) {
-      reset()
-    }
-  }, [enabled, reset])
-
   return {
-    reset
+    restart: restartObserver
   }
 }

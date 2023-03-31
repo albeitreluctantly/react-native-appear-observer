@@ -16,6 +16,5 @@ export interface AppearObserverOptions {
 }
 
 export interface ObserverStateHandlerProps {
-  readonly elementRef: AnyElementRef
-  readonly parentRef: AnyElementRef
+  readonly onStateUpdate: (isActive: boolean) => void
 }
