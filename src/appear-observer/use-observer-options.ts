@@ -11,6 +11,5 @@ const defaultOptions: Required<AppearObserverOptions> = {
   visibilityThreshold: 0,
   intervalDelay: 50,
   recalculateParentBoundaries: true,
-  enabled: true,
-  detectOnce: false
+  enabled: true
 }
