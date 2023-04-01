@@ -16,7 +16,7 @@ export interface ElementMeasurements {
 
 export type VoidCallback = () => void
 
-export type AnyElement = object
+export type AnyElement = any
 
 export type AnyElementRef = RefObject<AnyElement>
 
