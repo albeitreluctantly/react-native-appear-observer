@@ -66,10 +66,6 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
   const [isObserving, setIsObserving] = useState(enabled)
 
-  useImmediateReaction(() => {
-    setIsObserving(enabled)
-  }, [enabled])
-
   const [updateKey, forceUpdate] = useForceUpdate()
 
   const { onVisibilityChange, resetInteractivityHandler } =
@@ -91,7 +87,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
   useImmediateReaction(() => {
     restartObserver()
-  }, [parentRef, elementRef])
+  }, [parentRef, elementRef, enabled])
 
   const getParentBoundaries = useCallback(async () => {
     let parentBoundaries = currentParentBoundaries.current
