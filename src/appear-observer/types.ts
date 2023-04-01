@@ -1,20 +1,30 @@
-import { AnyElementRef, VoidCallback } from '../core'
+import { AnyElementRef, ElementBoundaries, VoidCallback } from '../core'
+import { InteractionListeners } from '../utils'
 
 export interface AppearObserverProps {
-  elementRef: AnyElementRef
-  parentRef?: AnyElementRef
-  onAppear?: VoidCallback
-  onDisappear?: VoidCallback
-  options?: AppearObserverOptions
+  readonly elementRef?: AnyElementRef
+  readonly onAppear?: VoidCallback
+  readonly onDisappear?: VoidCallback
+  readonly parentRef?: AnyElementRef
+  readonly onEnable?: VoidCallback
+  readonly onDisable?: VoidCallback
+  readonly enabled?: boolean
+  readonly options?: AppearObserverOptions
+  readonly interactionListeners?: InteractionListeners
 }
 
 export interface AppearObserverOptions {
-  visibilityThreshold?: number
-  intervalDelay?: number
-  recalculateParentBoundaries?: boolean
-  enabled?: boolean
+  readonly visibilityThreshold?: number
+  readonly intervalDelay?: number
+  readonly recalculateParentBoundaries?: boolean
+  readonly interactionModeEnabled?: boolean
+  readonly parentOffsets?: ElementBoundaries
+  readonly useScreenIfNoParent?: boolean
+  readonly optimizeOutOfScreen?: boolean
 }
 
-export interface ObserverStateHandlerProps {
+export interface ObserverInteractivityHandlerProps
+  extends InteractionListeners {
+  readonly interactionModeEnabled: boolean
   readonly onStateUpdate: (isActive: boolean) => void
 }

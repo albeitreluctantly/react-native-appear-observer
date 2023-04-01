@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useAppearObserverProvider } from '../appear-observer-provider'
-import { ObserverStateHandlerProps } from './types'
+import { ObserverInteractivityHandlerProps } from './types'
 
-export const useObserverStateHandler = ({
+export const useObserverInteractivityHandler = ({
+  interactionModeEnabled,
+  onInteractionStart,
+  onInteractionEnd,
   onStateUpdate
-}: ObserverStateHandlerProps) => {
-  const { interactionModeEnabled, onInteractionStart, onInteractionEnd } =
-    useAppearObserverProvider()
-
+}: ObserverInteractivityHandlerProps) => {
   const isInitialMeasurement = useRef(true)
 
   const idleModeTimeout = useRef<ReturnType<typeof setTimeout>>()
@@ -16,7 +15,7 @@ export const useObserverStateHandler = ({
     idleModeTimeout.current && clearTimeout(idleModeTimeout.current)
   }, [])
 
-  const resetStateHandler = useCallback(() => {
+  const resetInteractivityHandler = useCallback(() => {
     resetTimeout()
     isInitialMeasurement.current = true
   }, [resetTimeout])
@@ -49,6 +48,10 @@ export const useObserverStateHandler = ({
     onStateUpdate
   ])
 
+  useEffect(() => {
+    return () => resetTimeout()
+  }, [resetTimeout])
+
   const onVisibilityChange = useCallback(() => {
     if (interactionModeEnabled) {
       if (isInitialMeasurement.current) {
@@ -60,6 +63,6 @@ export const useObserverStateHandler = ({
 
   return {
     onVisibilityChange,
-    resetStateHandler
+    resetInteractivityHandler
   }
 }

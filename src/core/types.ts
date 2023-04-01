@@ -19,3 +19,8 @@ export type VoidCallback = () => void
 export type AnyElement = object
 
 export type AnyElementRef = RefObject<AnyElement>
+
+export type WeakenedKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>
+export type RequiredKeys<T, K extends keyof T> = Omit<T, K> &
+  Required<Pick<T, K>>

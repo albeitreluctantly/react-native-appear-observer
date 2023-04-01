@@ -1,4 +1,4 @@
-import { DependencyList, useRef } from 'react'
+import { DependencyList, useCallback, useRef, useState } from 'react'
 import { View } from 'react-native'
 import {
   AnyElement,
@@ -25,6 +25,13 @@ export const elementIntersectsWithParent = (
   elementBoundaries: ElementBoundaries,
   parentBoundaries: ElementBoundaries
 ) => {
+  if (
+    isZeroBoundaries(elementBoundaries) ||
+    isZeroBoundaries(parentBoundaries)
+  ) {
+    return false
+  }
+
   return (
     elementBoundaries.top <= parentBoundaries.bottom &&
     elementBoundaries.bottom >= parentBoundaries.top &&
@@ -32,6 +39,12 @@ export const elementIntersectsWithParent = (
     elementBoundaries.right >= parentBoundaries.left
   )
 }
+
+const isZeroBoundaries = (boundaries: ElementBoundaries) =>
+  boundaries.top === 0 &&
+  boundaries.right === 0 &&
+  boundaries.bottom === 0 &&
+  boundaries.left === 0
 
 export const elementHasZeroSize = (elementMeasures: ElementMeasurements) => {
   return elementMeasures.width === 0 || elementMeasures.height === 0
@@ -136,6 +149,16 @@ export const useImmediateReaction = (
     previousDeps.current = deps
     callback()
   }
+}
+
+export const useForceUpdate = () => {
+  const [updateKey, setUpdateKey] = useState(0)
+
+  const forceUpdate = useCallback(() => {
+    setUpdateKey(key => key + 1)
+  }, [])
+
+  return [updateKey, forceUpdate] as const
 }
 
 const getClass = {}.toString

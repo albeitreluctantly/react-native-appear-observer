@@ -1,35 +1,29 @@
 import { ReactNode } from 'react'
-import { ScrollViewProps } from 'react-native'
-import { AnyElementRef, VoidCallback } from '../core'
+import { AnyElementRef, ElementBoundaries, VoidCallback } from '../core'
+import {
+  InteractionHandlers,
+  InteractionRecorders,
+  ObservableElementProps
+} from '../utils'
 
-export type AvailablePropTypes =
-  | 'onScroll'
-  | 'onScrollBeginDrag'
-  | 'onScrollEndDrag'
-  | 'onTouchStart'
-  | 'onTouchEnd'
-  | 'onTouchMove'
-  | 'onTouchCancel'
-  | 'onLayout'
-  | 'collapsable'
-
-export type AvailableProps = Partial<Pick<ScrollViewProps, AvailablePropTypes>>
-
-export interface AppearObserverProviderProps extends AvailableProps {
-  readonly parentRef: AnyElementRef
+export interface AppearObserverProviderProps
+  extends InteractionHandlers,
+    ObservableElementProps {
+  readonly ref?: AnyElementRef
   readonly enableInteractionMode?: boolean
   readonly children:
     | ReactNode
     | ((
-        defaultProps: AvailableProps,
-        runInteractionStartListeners: VoidCallback,
-        runInteractionEndListeners: VoidCallback
+        props: InteractionHandlers & ObservableElementProps,
+        interactionRecorers: InteractionRecorders
       ) => ReactNode)
+  readonly offsets?: ElementBoundaries
 }
 
 export interface AppearObserverProviderValue {
   readonly parentRef: AnyElementRef | undefined
   readonly interactionModeEnabled: boolean
+  readonly parentOffsets: ElementBoundaries
   readonly onInteractionStart: (callback: VoidCallback) => VoidCallback
   readonly onInteractionEnd: (callback: VoidCallback) => VoidCallback
 }

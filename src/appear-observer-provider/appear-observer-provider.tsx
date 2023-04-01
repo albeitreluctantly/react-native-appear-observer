@@ -3,136 +3,55 @@ import {
   cloneElement,
   createContext,
   isValidElement,
-  useCallback,
   useContext,
-  useMemo,
-  useRef
+  useMemo
 } from 'react'
-import { VoidCallback, isFunction, noop } from '../core'
+import { isFunction, noop } from '../core'
+import { useInteractionHandler, useObservableTargetRef } from '../utils'
 import {
   AppearObserverProviderProps,
-  AppearObserverProviderValue,
-  AvailableProps
+  AppearObserverProviderValue
 } from './types'
+
+const defaultOffsets = {
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0
+}
 
 export const AppearObserverContext = createContext<AppearObserverProviderValue>(
   {
     parentRef: undefined,
     interactionModeEnabled: false,
+    parentOffsets: defaultOffsets,
     onInteractionStart: () => noop,
     onInteractionEnd: () => noop
   }
 )
 
 export const AppearObserverProvider = ({
-  parentRef,
+  ref,
   enableInteractionMode = true,
-  onScroll,
-  onScrollBeginDrag,
-  onScrollEndDrag,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  onTouchCancel,
   children,
-  // Fixes for android
   onLayout = noop,
-  collapsable = false
+  collapsable = false,
+  offsets = defaultOffsets,
+  ...interactionHandlerProps
 }: AppearObserverProviderProps) => {
-  const interactionStartListeners = useRef(new Set<VoidCallback>()).current
-  const interactionEndListeners = useRef(new Set<VoidCallback>()).current
+  const { interactionHandlers, interactionListeners, interactionRecorders } =
+    useInteractionHandler(interactionHandlerProps)
 
-  const onInteractionStart = useCallback(
-    (callback: VoidCallback) => {
-      interactionStartListeners.add(callback)
-
-      return () => interactionStartListeners.delete(callback)
-    },
-    [interactionStartListeners]
-  )
-
-  const onInteractionEnd = useCallback(
-    (callback: VoidCallback) => {
-      interactionEndListeners.add(callback)
-
-      return () => interactionEndListeners.delete(callback)
-    },
-    [interactionEndListeners]
-  )
-
-  const runInteractionStartListeners = useCallback(() => {
-    if (interactionStartListeners.size) {
-      interactionStartListeners.forEach(listener => listener())
-    }
-  }, [interactionStartListeners])
-
-  const runInteractionEndListeners = useCallback(() => {
-    if (interactionEndListeners.size) {
-      interactionEndListeners.forEach(listener => listener())
-    }
-  }, [interactionEndListeners])
-
-  const interactionProps: AvailableProps = useMemo(
-    () => ({
-      onScroll: event => {
-        runInteractionStartListeners()
-        onScroll?.(event)
-      },
-      onScrollBeginDrag: event => {
-        runInteractionStartListeners()
-        onScrollBeginDrag?.(event)
-      },
-      onTouchStart: event => {
-        runInteractionStartListeners()
-        onTouchStart?.(event)
-      },
-      onTouchMove: event => {
-        runInteractionStartListeners()
-        onTouchMove?.(event)
-      },
-
-      onScrollEndDrag: event => {
-        runInteractionEndListeners()
-        onScrollEndDrag?.(event)
-      },
-      onTouchEnd: event => {
-        runInteractionEndListeners()
-        onTouchEnd?.(event)
-      },
-      onTouchCancel: event => {
-        runInteractionEndListeners()
-        onTouchCancel?.(event)
-      },
-      onLayout,
-      collapsable
-    }),
-    [
-      runInteractionStartListeners,
-      onScroll,
-      onScrollBeginDrag,
-      onTouchStart,
-      onTouchMove,
-      runInteractionEndListeners,
-      onScrollEndDrag,
-      onTouchEnd,
-      onTouchCancel,
-      onLayout,
-      collapsable
-    ]
-  )
+  const refProps = useObservableTargetRef(ref)
 
   const props = enableInteractionMode
-    ? interactionProps
-    : { onLayout, collapsable }
+    ? { ...interactionHandlers, ...refProps, onLayout, collapsable }
+    : { ...refProps, onLayout, collapsable }
 
   let childComponent = children
 
   if (isFunction(childComponent)) {
-    childComponent = childComponent(
-      props,
-      runInteractionStartListeners,
-      runInteractionEndListeners
-    )
+    childComponent = childComponent(props, interactionRecorders)
   } else {
     const child = Children.only(children)
 
@@ -143,12 +62,25 @@ export const AppearObserverProvider = ({
 
   const value: AppearObserverProviderValue = useMemo(
     () => ({
-      parentRef,
+      parentRef: refProps.ref,
       interactionModeEnabled: enableInteractionMode,
-      onInteractionStart,
-      onInteractionEnd
+      parentOffsets: {
+        top: offsets.top,
+        right: offsets.right,
+        bottom: offsets.bottom,
+        left: offsets.left
+      },
+      ...interactionListeners
     }),
-    [enableInteractionMode, onInteractionStart, onInteractionEnd, parentRef]
+    [
+      refProps.ref,
+      enableInteractionMode,
+      interactionListeners,
+      offsets.top,
+      offsets.right,
+      offsets.bottom,
+      offsets.left
+    ]
   )
 
   return (

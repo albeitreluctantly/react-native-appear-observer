@@ -1,65 +1,97 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useAppearObserverProvider } from '../appear-observer-provider'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useWindowDimensions } from 'react-native'
 import {
   ElementBoundaries,
+  VoidCallback,
   createElementBoundaries,
   delay,
   elementHasZeroSize,
   elementIntersectsWithParent,
   listenIterable,
   measureInWindow,
+  useForceUpdate,
   useImmediateReaction
 } from '../core'
 import { AppearObserverProps } from './types'
-import { useObserverOptions } from './use-observer-options'
-import { useObserverStateHandler } from './use-observer-state-handler'
+import { useObserverConfiguration } from './use-observer-configuration'
 
-export const useAppearObserver = ({
-  elementRef,
-  parentRef: parentRefProp,
-  onAppear,
-  onDisappear,
-  options
-}: AppearObserverProps) => {
+import { useObservableTargetRef } from '../utils'
+// eslint-disable-next-line max-len
+import { useObserverInteractivityHandler } from './use-observer-interactivity-handler'
+
+export const useAppearObserver = (props: AppearObserverProps) => {
   const {
-    visibilityThreshold,
+    elementRef: elementRefProp,
+    parentRef,
+    onAppear,
+    onDisappear,
+    onEnable,
+    onDisable,
+    enabled,
+    interactionListeners,
+    options
+  } = useObserverConfiguration(props)
+
+  const refProps = useObservableTargetRef(elementRefProp)
+
+  const { ref: elementRef } = refProps
+
+  const {
+    interactionModeEnabled,
     recalculateParentBoundaries,
-    intervalDelay,
-    enabled
-  } = useObserverOptions(options)
+    visibilityThreshold,
+    optimizeOutOfScreen,
+    parentOffsets,
+    useScreenIfNoParent,
+    intervalDelay
+  } = options
 
-  const { parentRef: parentRefContext, interactionModeEnabled } =
-    useAppearObserverProvider()
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions()
 
-  const parentRef = parentRefProp || parentRefContext
-
-  const [isObserving, setIsObserving] = useState(enabled)
-
-  // TODO: Remove, implement proper solutuion
-  const [restartKey, setRestartKey] = useState(Math.random())
-
-  const { onVisibilityChange, resetStateHandler } = useObserverStateHandler({
-    onStateUpdate: setIsObserving
-  })
-
-  const restartObserver = useCallback(
-    (isActive = true) => {
-      elementIsCurrentlyVisible.current = false
-      currentParentBoundaries.current = undefined
-      resetStateHandler()
-      setIsObserving(isActive)
-      setRestartKey(Math.random())
-    },
-    [resetStateHandler]
+  const windowBoundaries: ElementBoundaries = useMemo(
+    () => ({
+      top: 0 + parentOffsets.top,
+      right: windowWidth + parentOffsets.right,
+      bottom: windowHeight + parentOffsets.bottom,
+      left: 0 + parentOffsets.left
+    }),
+    [parentOffsets, windowWidth, windowHeight]
   )
-
-  useImmediateReaction(() => {
-    restartObserver(enabled)
-  }, [interactionModeEnabled, parentRef, elementRef, enabled])
 
   const currentParentBoundaries = useRef<ElementBoundaries | undefined>()
 
   const elementIsCurrentlyVisible = useRef(false)
+
+  const wasEnabled = useRef(enabled)
+
+  const [isObserving, setIsObserving] = useState(enabled)
+
+  useImmediateReaction(() => {
+    setIsObserving(enabled)
+  }, [enabled])
+
+  const [updateKey, forceUpdate] = useForceUpdate()
+
+  const { onVisibilityChange, resetInteractivityHandler } =
+    useObserverInteractivityHandler({
+      ...interactionListeners,
+      interactionModeEnabled,
+      onStateUpdate: setIsObserving
+    })
+
+  const restartObserver = useCallback(() => {
+    elementIsCurrentlyVisible.current = false
+    currentParentBoundaries.current = undefined
+    wasEnabled.current = enabled
+
+    resetInteractivityHandler()
+    setIsObserving(enabled)
+    forceUpdate()
+  }, [enabled, resetInteractivityHandler, forceUpdate])
+
+  useImmediateReaction(() => {
+    restartObserver()
+  }, [parentRef, elementRef])
 
   const getParentBoundaries = useCallback(async () => {
     let parentBoundaries = currentParentBoundaries.current
@@ -68,31 +100,30 @@ export const useAppearObserver = ({
       const measurements = await measureInWindow(parentRef?.current)
 
       if (!elementHasZeroSize(measurements)) {
-        parentBoundaries = createElementBoundaries(measurements)
+        const boundaries = createElementBoundaries(measurements)
+
+        parentBoundaries = {
+          top: boundaries.top + parentOffsets.top,
+          right: boundaries.right + parentOffsets.right,
+          bottom: boundaries.bottom + parentOffsets.bottom,
+          left: boundaries.left + parentOffsets.left
+        }
 
         currentParentBoundaries.current = parentBoundaries
       }
     }
 
     return parentBoundaries
-  }, [parentRef, recalculateParentBoundaries])
+  }, [parentOffsets, parentRef, recalculateParentBoundaries])
 
   const observeElementVisibility = useCallback(
     async function* () {
       while (isObserving) {
+        // Initial delay to wait for layout
+        // makes observer do one cycle instead of two initially
         await delay(1)
 
-        const parentBoundaries = await getParentBoundaries()
-
-        if (!parentBoundaries) {
-          return
-        }
-
         const elementMeasurements = await measureInWindow(elementRef.current)
-
-        if (elementHasZeroSize(elementMeasurements)) {
-          return
-        }
 
         const { x, y, width, height } = elementMeasurements
 
@@ -106,49 +137,93 @@ export const useAppearObserver = ({
           height
         })
 
-        yield elementIntersectsWithParent(elementBoundaries, parentBoundaries)
+        if (optimizeOutOfScreen) {
+          const elementIntersectsWithWindow = elementIntersectsWithParent(
+            elementBoundaries,
+            windowBoundaries
+          )
+
+          if (!elementIntersectsWithWindow) {
+            yield false
+            await delay(intervalDelay * 2)
+
+            return
+          }
+        }
+
+        const parentBoundaries =
+          useScreenIfNoParent && !parentRef
+            ? windowBoundaries
+            : await getParentBoundaries()
+
+        if (!parentBoundaries) {
+          yield false
+        } else {
+          yield elementIntersectsWithParent(elementBoundaries, parentBoundaries)
+        }
 
         await delay(intervalDelay)
       }
     },
     [
       isObserving,
-      getParentBoundaries,
       elementRef,
       visibilityThreshold,
+      optimizeOutOfScreen,
+      useScreenIfNoParent,
+      parentRef,
+      windowBoundaries,
+      getParentBoundaries,
       intervalDelay
     ]
   )
 
   useEffect(() => {
-    const stopObserving = listenIterable(
-      observeElementVisibility(),
-      elementIsVisible => {
-        if (elementIsCurrentlyVisible.current !== elementIsVisible) {
-          elementIsCurrentlyVisible.current = elementIsVisible
+    let stopObserving: VoidCallback
 
-          if (elementIsVisible) {
-            onAppear?.()
-          } else {
-            onDisappear?.()
+    if (enabled) {
+      stopObserving = listenIterable(
+        observeElementVisibility(),
+        elementIsVisible => {
+          if (elementIsCurrentlyVisible.current !== elementIsVisible) {
+            elementIsCurrentlyVisible.current = elementIsVisible
+
+            if (elementIsVisible) {
+              onAppear?.()
+            } else {
+              onDisappear?.()
+            }
           }
+
+          onVisibilityChange()
         }
+      )
+    }
 
-        onVisibilityChange()
-      }
-    )
-
-    return () => stopObserving()
+    return () => stopObserving?.()
   }, [
+    enabled,
     observeElementVisibility,
     onAppear,
     onDisappear,
     onVisibilityChange,
-    enabled,
-    restartKey
+    updateKey
   ])
 
+  useEffect(() => {
+    if (enabled !== wasEnabled.current) {
+      if (enabled) {
+        onEnable?.()
+      } else {
+        onDisable?.()
+      }
+    }
+
+    wasEnabled.current = enabled
+  }, [enabled, onEnable, onDisable])
+
   return {
-    restart: restartObserver
+    restart: restartObserver,
+    refProps
   }
 }
