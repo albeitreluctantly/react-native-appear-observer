@@ -17,7 +17,7 @@ export interface AppearObserverProviderProps
         props: InteractionHandlers & ObservableElementProps,
         interactionRecorders: InteractionRecorders
       ) => ReactNode)
-  readonly offsets?: ElementBoundaries
+  readonly offsets?: Partial<ElementBoundaries>
 }
 
 export interface AppearObserverProviderValue {

@@ -1,7 +1,18 @@
 import { useMemo } from 'react'
 import { useAppearObserverProvider } from '../appear-observer-provider'
+import { ElementBoundaries } from '../core'
 import { InteractionListeners } from '../utils'
 import { AppearObserverOptions, AppearObserverProps } from './types'
+
+type UseObserverConfiguration = Omit<
+  AppearObserverProps,
+  'options' | 'interactionListeners'
+> & {
+  options: Omit<Required<AppearObserverOptions>, 'parentOffsets'> & {
+    parentOffsets: ElementBoundaries
+  }
+  interactionListeners: Required<InteractionListeners>
+}
 
 export const useObserverConfiguration = ({
   elementRef,
@@ -13,20 +24,34 @@ export const useObserverConfiguration = ({
   enabled,
   interactionListeners,
   options
-}: AppearObserverProps): Omit<
-  AppearObserverProps,
-  'options' | 'interactionListeners'
-> & {
-  options: Required<AppearObserverOptions>
-  interactionListeners: Required<InteractionListeners>
-} => {
+}: AppearObserverProps): UseObserverConfiguration => {
   const {
     parentRef: parentRefContext,
     interactionModeEnabled,
-    parentOffsets: parentOffsets,
+    parentOffsets: parentOffsetsContext,
     onInteractionStart,
     onInteractionEnd
   } = useAppearObserverProvider()
+
+  const parentOffsets = options?.parentOffsets
+
+  const requiredParentOffsets = useMemo(() => {
+    if (
+      !parentOffsets?.top === undefined &&
+      parentOffsets?.right === undefined &&
+      parentOffsets?.bottom === undefined &&
+      parentOffsets?.left === undefined
+    ) {
+      return undefined
+    }
+
+    return defaultOptions.parentOffsets as Required<ElementBoundaries>
+  }, [
+    parentOffsets?.bottom,
+    parentOffsets?.left,
+    parentOffsets?.right,
+    parentOffsets?.top
+  ])
 
   return useMemo(
     () => ({
@@ -38,34 +63,31 @@ export const useObserverConfiguration = ({
       onDisable,
       enabled:
         !parentRef &&
-        (options?.useScreenIfNoParent || defaultOptions.useScreenIfNoParent)
+        (options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent)
           ? false
           : enabled,
       interactionListeners: {
         onInteractionStart:
-          interactionListeners?.onInteractionStart || onInteractionStart,
+          interactionListeners?.onInteractionStart ?? onInteractionStart,
         onInteractionEnd:
-          interactionListeners?.onInteractionEnd || onInteractionEnd
+          interactionListeners?.onInteractionEnd ?? onInteractionEnd
       },
       options: {
         visibilityThreshold:
-          options?.visibilityThreshold || defaultOptions.visibilityThreshold,
-        intervalDelay: options?.intervalDelay || defaultOptions.intervalDelay,
+          options?.visibilityThreshold ?? defaultOptions.visibilityThreshold,
+        intervalDelay: options?.intervalDelay ?? defaultOptions.intervalDelay,
         recalculateParentBoundaries:
-          options?.recalculateParentBoundaries ||
+          options?.recalculateParentBoundaries ??
           defaultOptions.recalculateParentBoundaries,
         interactionModeEnabled:
-          options?.interactionModeEnabled ||
-          interactionModeEnabled ||
+          options?.interactionModeEnabled ??
+          interactionModeEnabled ??
           defaultOptions.interactionModeEnabled,
-        parentOffsets:
-          options?.parentOffsets ||
-          parentOffsets ||
-          defaultOptions.parentOffsets,
+        parentOffsets: requiredParentOffsets || parentOffsetsContext,
         optimizeOutOfScreen:
-          options?.optimizeOutOfScreen || defaultOptions?.optimizeOutOfScreen,
+          options?.optimizeOutOfScreen ?? defaultOptions.optimizeOutOfScreen,
         useScreenIfNoParent:
-          options?.useScreenIfNoParent || defaultOptions.useScreenIfNoParent
+          options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent
       }
     }),
     [
@@ -83,13 +105,13 @@ export const useObserverConfiguration = ({
       options?.interactionModeEnabled,
       options?.intervalDelay,
       options?.optimizeOutOfScreen,
-      options?.parentOffsets,
       options?.recalculateParentBoundaries,
       options?.useScreenIfNoParent,
       options?.visibilityThreshold,
-      parentOffsets,
+      parentOffsetsContext,
       parentRef,
-      parentRefContext
+      parentRefContext,
+      requiredParentOffsets
     ]
   )
 }

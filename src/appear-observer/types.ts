@@ -18,7 +18,7 @@ export interface AppearObserverOptions {
   readonly intervalDelay?: number
   readonly recalculateParentBoundaries?: boolean
   readonly interactionModeEnabled?: boolean
-  readonly parentOffsets?: ElementBoundaries
+  readonly parentOffsets?: Partial<ElementBoundaries>
   readonly useScreenIfNoParent?: boolean
   readonly optimizeOutOfScreen?: boolean
 }

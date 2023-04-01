@@ -42,7 +42,7 @@ export const AppearObserverProvider = forwardRef<
       children,
       onLayout = noop,
       collapsable = false,
-      offsets = defaultOffsets,
+      offsets,
       ...interactionHandlerProps
     }: AppearObserverProviderProps,
     ref
@@ -73,10 +73,10 @@ export const AppearObserverProvider = forwardRef<
         parentRef: refProps.ref as RefObject<AnyElement>,
         interactionModeEnabled: enableInteractionMode,
         parentOffsets: {
-          top: offsets.top,
-          right: offsets.right,
-          bottom: offsets.bottom,
-          left: offsets.left
+          top: offsets?.top ?? defaultOffsets.top,
+          right: offsets?.right ?? defaultOffsets.right,
+          bottom: offsets?.bottom ?? defaultOffsets.bottom,
+          left: offsets?.left ?? defaultOffsets.left
         },
         ...interactionListeners
       }),
@@ -84,10 +84,10 @@ export const AppearObserverProvider = forwardRef<
         refProps.ref,
         enableInteractionMode,
         interactionListeners,
-        offsets.top,
-        offsets.right,
-        offsets.bottom,
-        offsets.left
+        offsets?.top,
+        offsets?.right,
+        offsets?.bottom,
+        offsets?.left
       ]
     )
 
