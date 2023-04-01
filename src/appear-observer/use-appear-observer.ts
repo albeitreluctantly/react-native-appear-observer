@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import {
-  BREAK,
   ElementBoundaries,
   VoidCallback,
   createElementBoundaries,
@@ -138,6 +137,8 @@ export const useAppearObserver = (props: AppearObserverProps) => {
           height
         })
 
+        let elementIsOutOfScreen = false
+
         if (optimizeOutOfScreen) {
           const elementIntersectsWithWindow = elementIntersectsWithParent(
             elementBoundaries,
@@ -145,25 +146,30 @@ export const useAppearObserver = (props: AppearObserverProps) => {
           )
 
           if (!elementIntersectsWithWindow) {
+            elementIsOutOfScreen = true
+
             yield false
             await delay(intervalDelay * 2)
-
-            yield BREAK
           }
         }
 
-        const parentBoundaries =
-          useScreenIfNoParent && !parentRef
-            ? windowBoundaries
-            : await getParentBoundaries()
+        if (!elementIsOutOfScreen) {
+          const parentBoundaries =
+            useScreenIfNoParent && !parentRef
+              ? windowBoundaries
+              : await getParentBoundaries()
 
-        if (!parentBoundaries) {
-          yield false
-        } else {
-          yield elementIntersectsWithParent(elementBoundaries, parentBoundaries)
+          if (!parentBoundaries) {
+            yield false
+          } else {
+            yield elementIntersectsWithParent(
+              elementBoundaries,
+              parentBoundaries
+            )
+          }
         }
 
-        await delay(intervalDelay)
+        await delay(intervalDelay * (elementIsOutOfScreen ? 2 : 1))
       }
     },
     [

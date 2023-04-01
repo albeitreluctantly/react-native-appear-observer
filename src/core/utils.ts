@@ -80,18 +80,14 @@ export const isAsyncIterable = (value: unknown) => {
   return Symbol.asyncIterator in Object(value)
 }
 
-export const BREAK = Symbol.for('BREAK')
-
-type ExcludeBreak<T> = Exclude<T, typeof BREAK>
-
 export const iterateAsyncIterable = async <T>(
   generator: AsyncIterableIterator<T>,
-  handler: (value: ExcludeBreak<T>) => void,
+  handler: (value: T) => void,
   stopper?: { stop: boolean }
 ) => {
   let generatorIsDone = false
 
-  const stoppableHandler = (value: ExcludeBreak<T>) => {
+  const stoppableHandler = (value: T) => {
     if (stopper?.stop) return
 
     handler(value)
@@ -105,7 +101,7 @@ export const iterateAsyncIterable = async <T>(
 
     const { value, done } = await generator.next()
 
-    if (!(done && value === undefined) && value !== BREAK) {
+    if (!(done && value === undefined)) {
       if (isAsyncIterable(value)) {
         await iterateAsyncIterable(value, stoppableHandler, stopper)
       } else {
@@ -119,7 +115,7 @@ export const iterateAsyncIterable = async <T>(
 
 export const listenIterable = <T>(
   generator: AsyncIterableIterator<T>,
-  handler: (value: Exclude<T, typeof BREAK>) => void
+  handler: (value: T) => void
 ) => {
   const stopper = { stop: false }
 
