@@ -169,7 +169,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
           }
         }
 
-        await delay(intervalDelay * (elementIsOutOfScreen ? 2 : 1))
+        await delay(intervalDelay)
       }
     },
     [
