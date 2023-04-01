@@ -10,7 +10,7 @@ export const useObserverConfiguration = ({
   onDisappear,
   onEnable,
   onDisable,
-  enabled = true,
+  enabled,
   interactionListeners,
   options
 }: AppearObserverProps): Omit<
@@ -36,7 +36,11 @@ export const useObserverConfiguration = ({
       onDisappear,
       onEnable,
       onDisable,
-      enabled,
+      enabled:
+        !parentRef &&
+        (options?.useScreenIfNoParent || defaultOptions.useScreenIfNoParent)
+          ? false
+          : enabled,
       interactionListeners: {
         onInteractionStart:
           interactionListeners?.onInteractionStart || onInteractionStart,
@@ -102,5 +106,5 @@ const defaultOptions: Required<AppearObserverOptions> = {
     left: 0
   },
   optimizeOutOfScreen: true,
-  useScreenIfNoParent: true
+  useScreenIfNoParent: false
 }

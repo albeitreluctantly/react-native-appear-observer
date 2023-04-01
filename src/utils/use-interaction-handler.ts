@@ -6,6 +6,7 @@ export const useInteractionHandler = ({
   onScroll,
   onScrollBeginDrag,
   onScrollEndDrag,
+  onMomentumScrollEnd,
   onTouchStart,
   onTouchMove,
   onTouchEnd,
@@ -67,6 +68,10 @@ export const useInteractionHandler = ({
         recordInteractionEnd()
         onScrollEndDrag?.(event)
       },
+      onMomentumScrollEnd: event => {
+        recordInteractionEnd()
+        onMomentumScrollEnd?.(event)
+      },
       onTouchEnd: event => {
         recordInteractionEnd()
         onTouchEnd?.(event)
@@ -85,7 +90,8 @@ export const useInteractionHandler = ({
       recordInteractionEnd,
       onScrollEndDrag,
       onTouchEnd,
-      onTouchCancel
+      onTouchCancel,
+      onMomentumScrollEnd
     ]
   )
 

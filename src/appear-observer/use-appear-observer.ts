@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import {
+  BREAK,
   ElementBoundaries,
   VoidCallback,
   createElementBoundaries,
@@ -147,7 +148,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
             yield false
             await delay(intervalDelay * 2)
 
-            return
+            yield BREAK
           }
         }
 

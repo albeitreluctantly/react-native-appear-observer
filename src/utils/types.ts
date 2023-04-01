@@ -9,6 +9,7 @@ type InteractionHandlerTypes =
   | 'onTouchEnd'
   | 'onTouchMove'
   | 'onTouchCancel'
+  | 'onMomentumScrollEnd'
 
 export type InteractionHandlers = Partial<
   Pick<ScrollViewProps, InteractionHandlerTypes>
