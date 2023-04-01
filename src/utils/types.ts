@@ -25,7 +25,7 @@ export interface InteractionRecorders {
   readonly recordInteractionEnd: VoidCallback
 }
 
-export interface UseInteractionHandler {
+export interface InteractionManagerData {
   readonly interactionHandlers: InteractionHandlers
   readonly interactionListeners: InteractionListeners
   readonly interactionRecorders: InteractionRecorders

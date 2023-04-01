@@ -9,7 +9,7 @@ import {
   useMemo
 } from 'react'
 import { AnyElement, isFunction, noop } from '../core'
-import { useInteractionHandler, useObservableTargetRef } from '../utils'
+import { useInteractionManager, useObservableTargetRef } from '../utils'
 import {
   AppearObserverProviderProps,
   AppearObserverProviderValue
@@ -48,7 +48,7 @@ export const AppearObserverProvider = forwardRef<
     ref
   ) => {
     const { interactionHandlers, interactionListeners, interactionRecorders } =
-      useInteractionHandler(interactionHandlerProps)
+      useInteractionManager(interactionHandlerProps)
 
     const refProps = useObservableTargetRef(ref)
 

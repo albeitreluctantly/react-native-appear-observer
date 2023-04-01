@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef } from 'react'
 import { VoidCallback } from '../core'
-import { InteractionHandlers, UseInteractionHandler } from './types'
+import { InteractionHandlers, InteractionManagerData } from './types'
 
-export const useInteractionHandler = ({
+export const useInteractionManager = ({
   onScroll,
   onScrollBeginDrag,
   onScrollEndDrag,
@@ -11,7 +11,7 @@ export const useInteractionHandler = ({
   onTouchMove,
   onTouchEnd,
   onTouchCancel
-}: InteractionHandlers): UseInteractionHandler => {
+}: InteractionHandlers = {}): InteractionManagerData => {
   const interactionStartListeners = useRef(new Set<VoidCallback>()).current
   const interactionEndListeners = useRef(new Set<VoidCallback>()).current
 

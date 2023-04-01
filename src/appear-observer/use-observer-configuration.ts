@@ -4,7 +4,7 @@ import { ElementBoundaries } from '../core'
 import { InteractionListeners } from '../utils'
 import { AppearObserverOptions, AppearObserverProps } from './types'
 
-type UseObserverConfiguration = Omit<
+type ObserverConfiguration = Omit<
   AppearObserverProps,
   'options' | 'interactionListeners'
 > & {
@@ -24,7 +24,7 @@ export const useObserverConfiguration = ({
   enabled,
   interactionListeners,
   options
-}: AppearObserverProps): UseObserverConfiguration => {
+}: AppearObserverProps): ObserverConfiguration => {
   const {
     parentRef: parentRefContext,
     interactionModeEnabled,
