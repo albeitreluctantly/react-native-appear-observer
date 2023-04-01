@@ -25,7 +25,7 @@ const defaultOffsets = {
 export const AppearObserverContext = createContext<AppearObserverProviderValue>(
   {
     parentRef: undefined,
-    interactionModeEnabled: false,
+    interactionModeEnabled: true,
     parentOffsets: defaultOffsets,
     onInteractionStart: () => noop,
     onInteractionEnd: () => noop

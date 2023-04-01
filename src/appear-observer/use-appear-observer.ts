@@ -135,7 +135,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
         let elementIsOutOfScreen = false
 
-        if (optimizeOutOfScreen) {
+        if (recalculateParentBoundaries && optimizeOutOfScreen) {
           const elementIntersectsWithWindow = elementIntersectsWithParent(
             elementBoundaries,
             windowBoundaries
@@ -177,7 +177,8 @@ export const useAppearObserver = (props: AppearObserverProps) => {
       parentRef,
       windowBoundaries,
       getParentBoundaries,
-      intervalDelay
+      intervalDelay,
+      recalculateParentBoundaries
     ]
   )
 
