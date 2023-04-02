@@ -9,6 +9,7 @@ export const useObserverInteractivityHandler = ({
   initialCyclesCount
 }: ObserverInteractivityHandlerProps) => {
   const currentCyclesCount = useRef(0)
+  const interactionStarted = useRef(false)
 
   const idleModeTimeout = useRef<ReturnType<typeof setTimeout>>()
 
@@ -19,11 +20,13 @@ export const useObserverInteractivityHandler = ({
   const resetInteractivityHandler = useCallback(() => {
     resetTimeout()
     currentCyclesCount.current = 0
+    interactionStarted.current = false
   }, [resetTimeout])
 
   useEffect(() => {
     if (interactionModeEnabled) {
       const unsubscribeStart = onInteractionStart(() => {
+        interactionStarted.current = true
         resetTimeout()
         onStateUpdate(true)
       })
@@ -57,7 +60,7 @@ export const useObserverInteractivityHandler = ({
     if (interactionModeEnabled) {
       if (currentCyclesCount.current < initialCyclesCount) {
         currentCyclesCount.current = currentCyclesCount.current + 1
-      } else {
+      } else if (!interactionStarted.current) {
         onStateUpdate(false)
       }
     }
