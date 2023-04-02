@@ -87,7 +87,9 @@ export const useObserverConfiguration = ({
         optimizeOutOfScreen:
           options?.optimizeOutOfScreen ?? defaultOptions.optimizeOutOfScreen,
         useScreenIfNoParent:
-          options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent
+          options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent,
+        initialCyclesCount:
+          options?.initialCyclesCount ?? defaultOptions.initialCyclesCount
       }
     }),
     [
@@ -128,5 +130,6 @@ const defaultOptions: Required<AppearObserverOptions> = {
     left: 0
   },
   optimizeOutOfScreen: true,
-  useScreenIfNoParent: false
+  useScreenIfNoParent: false,
+  initialCyclesCount: 50
 }

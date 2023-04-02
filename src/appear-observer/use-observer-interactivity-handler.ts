@@ -5,9 +5,10 @@ export const useObserverInteractivityHandler = ({
   interactionModeEnabled,
   onInteractionStart,
   onInteractionEnd,
-  onStateUpdate
+  onStateUpdate,
+  initialCyclesCount
 }: ObserverInteractivityHandlerProps) => {
-  const isInitialMeasurement = useRef(true)
+  const currentCyclesCount = useRef(0)
 
   const idleModeTimeout = useRef<ReturnType<typeof setTimeout>>()
 
@@ -17,7 +18,7 @@ export const useObserverInteractivityHandler = ({
 
   const resetInteractivityHandler = useCallback(() => {
     resetTimeout()
-    isInitialMeasurement.current = true
+    currentCyclesCount.current = 0
   }, [resetTimeout])
 
   useEffect(() => {
@@ -54,10 +55,11 @@ export const useObserverInteractivityHandler = ({
 
   const onVisibilityChange = useCallback(() => {
     if (interactionModeEnabled) {
-      if (isInitialMeasurement.current) {
+      if (currentCyclesCount.current < initialCyclesCount) {
+        currentCyclesCount.current = currentCyclesCount.current + 1
+      } else {
         onStateUpdate(false)
       }
-      isInitialMeasurement.current = false
     }
   }, [interactionModeEnabled, onStateUpdate])
 

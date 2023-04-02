@@ -41,8 +41,19 @@ export const useAppearObserver = (props: AppearObserverProps) => {
     optimizeOutOfScreen,
     parentOffsets,
     useScreenIfNoParent,
-    intervalDelay
+    intervalDelay,
+    initialCyclesCount
   } = options
+
+  const [isObserving, setIsObserving] = useState(enabled)
+
+  const { onVisibilityChange, resetInteractivityHandler } =
+    useObserverInteractivityHandler({
+      ...interactionListeners,
+      interactionModeEnabled,
+      onStateUpdate: setIsObserving,
+      initialCyclesCount
+    })
 
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
 
@@ -62,16 +73,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
   const wasEnabled = useRef(enabled)
 
-  const [isObserving, setIsObserving] = useState(enabled)
-
   const [updateKey, forceUpdate] = useForceUpdate()
-
-  const { onVisibilityChange, resetInteractivityHandler } =
-    useObserverInteractivityHandler({
-      ...interactionListeners,
-      interactionModeEnabled,
-      onStateUpdate: setIsObserving
-    })
 
   const restartObserver = useCallback(() => {
     elementIsCurrentlyVisible.current = false
