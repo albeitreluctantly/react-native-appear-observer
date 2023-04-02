@@ -20,7 +20,6 @@
   "rules": {
     "comma-dangle": "off",
     "semi": "off",
-    "max-len": ["warn", 80],
     "no-param-reassign": "error",
     "no-duplicate-imports": "warn",
     "spaced-comment": "warn",

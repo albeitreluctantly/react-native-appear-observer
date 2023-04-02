@@ -21,30 +21,31 @@ export const createElementBoundaries = ({
   left: x
 })
 
-export const elementIntersectsWithParent = (
-  elementBoundaries: ElementBoundaries,
-  parentBoundaries: ElementBoundaries
+export const getIntersectionPercentage = (
+  element1: ElementBoundaries,
+  element2: ElementBoundaries
 ) => {
-  if (
-    isZeroBoundaries(elementBoundaries) ||
-    isZeroBoundaries(parentBoundaries)
-  ) {
-    return false
-  }
+  const topIntersection = Math.min(element1.bottom, element2.bottom)
+  const bottomIntersection = Math.max(element1.top, element2.top)
 
-  return (
-    elementBoundaries.top <= parentBoundaries.bottom &&
-    elementBoundaries.bottom >= parentBoundaries.top &&
-    elementBoundaries.left <= parentBoundaries.right &&
-    elementBoundaries.right >= parentBoundaries.left
-  )
+  const leftIntersection = Math.max(element1.left, element2.left)
+  const rightIntersection = Math.min(element1.right, element2.right)
+
+  const widthIntersection = rightIntersection - leftIntersection
+  const heightIntersection = topIntersection - bottomIntersection
+
+  const overlapArea =
+    widthIntersection < 0 || heightIntersection < 0
+      ? 0
+      : widthIntersection * heightIntersection
+
+  const element1Area =
+    (element1.right - element1.left) * (element1.bottom - element1.top)
+
+  return toPrecise((overlapArea / element1Area) * 100)
 }
 
-const isZeroBoundaries = (boundaries: ElementBoundaries) =>
-  boundaries.top === 0 &&
-  boundaries.right === 0 &&
-  boundaries.bottom === 0 &&
-  boundaries.left === 0
+const toPrecise = (number: number) => Math.floor(number * 1000) / 1000
 
 export const elementHasZeroSize = (elementMeasures: ElementMeasurements) => {
   return elementMeasures.width === 0 || elementMeasures.height === 0

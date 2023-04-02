@@ -6,17 +6,15 @@ import {
   createElementBoundaries,
   delay,
   elementHasZeroSize,
-  elementIntersectsWithParent,
+  getIntersectionPercentage,
   listenIterable,
   measureInWindow,
   useForceUpdate,
   useImmediateReaction
 } from '../core'
+import { useObservableTargetRef } from '../utils'
 import { AppearObserverProps } from './types'
 import { useObserverConfiguration } from './use-observer-configuration'
-
-import { useObservableTargetRef } from '../utils'
-// eslint-disable-next-line max-len
 import { useObserverInteractivityHandler } from './use-observer-interactivity-handler'
 
 export const useAppearObserver = (props: AppearObserverProps) => {
@@ -121,25 +119,13 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
         const elementMeasurements = await measureInWindow(elementRef.current)
 
-        const { x, y, width, height } = elementMeasurements
-
-        const verticalVisibilityThreshold = height * visibilityThreshold
-        const horizontalVisibilityThreshold = width * visibilityThreshold
-
-        const elementBoundaries = createElementBoundaries({
-          x: x + horizontalVisibilityThreshold,
-          y: y + verticalVisibilityThreshold,
-          width,
-          height
-        })
+        const elementBoundaries = createElementBoundaries(elementMeasurements)
 
         let elementIsOutOfScreen = false
 
         if (recalculateParentBoundaries && optimizeOutOfScreen) {
-          const elementIntersectsWithWindow = elementIntersectsWithParent(
-            elementBoundaries,
-            windowBoundaries
-          )
+          const elementIntersectsWithWindow =
+            getIntersectionPercentage(elementBoundaries, windowBoundaries) > 0
 
           if (!elementIntersectsWithWindow) {
             elementIsOutOfScreen = true
@@ -158,10 +144,10 @@ export const useAppearObserver = (props: AppearObserverProps) => {
           if (!parentBoundaries) {
             yield false
           } else {
-            yield elementIntersectsWithParent(
+            yield getIntersectionPercentage(
               elementBoundaries,
               parentBoundaries
-            )
+            ) >= visibilityThreshold
           }
         }
 

@@ -43,6 +43,7 @@ export const AppearObserverProvider = forwardRef<
       onLayout = noop,
       collapsable = false,
       offsets,
+      scrollEventThrottle = 16,
       ...interactionHandlerProps
     }: AppearObserverProviderProps,
     ref
@@ -52,9 +53,19 @@ export const AppearObserverProvider = forwardRef<
 
     const refProps = useObservableTargetRef(ref)
 
+    const basicProps = {
+      ...refProps,
+      onLayout,
+      collapsable,
+      scrollEventThrottle
+    }
+
     const props = enableInteractionMode
-      ? { ...interactionHandlers, ...refProps, onLayout, collapsable }
-      : { ...refProps, onLayout, collapsable }
+      ? {
+          ...interactionHandlers,
+          ...basicProps
+        }
+      : basicProps
 
     let childComponent = children
 
