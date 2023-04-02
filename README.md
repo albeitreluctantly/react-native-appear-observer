@@ -5,18 +5,20 @@ A React Native library to detect element appearance on the screen
 <h2>Version 2.0</h2>
 
 Version 2.0 considers the mistakes of first version and expands functionality, briefly it:
--has updated appear observer hook cycle logic
--adds support for enabling, disabling and reseting observer (can be used with react navigation)
--adds full support for usage without provider
--adds support for render props children to provider
--adds support of callbacks to provider, adds onScroll as interaction handler
--adds a utility hook for adding necessary fixes to elements to work on android,
-incorporates it in observer and provider hooks
--adds support for usage without parent, relying on window boundaries (provided offsets considered)
--adds support of settings parent offsets (for cases of floating element above parent)
--drops reqirement of explicit refs
--memoizes the configurations properly so that simple non memoized objects can be used
--drops support for useIsAppeared (so far)
+
+- has updated appear observer hook cycle logic
+- adds support for enabling, disabling and reseting observer (can be used with react navigation)
+- adds full support for usage without provider
+- adds support for render props children to provider
+- adds support of callbacks to provider, adds onScroll as interaction handler
+- adds a utility hook for adding necessary fixes to elements to work on android,
+  incorporates it in observer and provider hooks
+- adds support for usage without parent, relying on window boundaries (provided offsets considered)
+- adds support of settings parent offsets (for cases of floating element above parent)
+- drops reqirement of explicit refs
+- memoizes the configurations properly so that simple non memoized objects can be used
+- changes intersection detection algorithm, incorrect visibility threshold is fixed
+- drops support for useIsAppeared (so far)
 
 Proper documentation will be added later!
 

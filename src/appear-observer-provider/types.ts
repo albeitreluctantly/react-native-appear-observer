@@ -18,7 +18,6 @@ export interface AppearObserverProviderProps
         interactionRecorders: InteractionRecorders
       ) => ReactNode)
   readonly offsets?: Partial<ElementBoundaries>
-  readonly scrollEventThrottle?: number
 }
 
 export interface AppearObserverProviderValue {
