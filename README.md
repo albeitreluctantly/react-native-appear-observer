@@ -19,6 +19,7 @@ Version 2.0 considers the mistakes of first version and expands functionality, b
 - memoizes the configurations properly so that simple non memoized objects can be used
 - changes intersection detection algorithm, incorrect visibility threshold is fixed
 - drops support for useIsAppeared (so far)
+- adds initialCyclesCount prop for interaction mode
 
 Proper documentation will be added later!
 
