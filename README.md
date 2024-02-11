@@ -2,6 +2,8 @@
 
 A React Native library to detect element appearance on the screen
 
+> Version 2.1.0 bumps React Native version to 0.72.5. Version 2.0.3 updates minor dependency versions.
+
 <h2>Version 2.0</h2>
 
 Version 2.0 considers the mistakes of first version and expands functionality, briefly it:
