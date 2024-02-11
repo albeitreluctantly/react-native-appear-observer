@@ -21,12 +21,10 @@ export interface AppearObserverOptions {
   readonly parentOffsets?: Partial<ElementBoundaries>
   readonly useScreenIfNoParent?: boolean
   readonly optimizeOutOfScreen?: boolean
-  readonly initialCyclesCount?: number
 }
 
 export interface ObserverInteractivityHandlerProps
   extends InteractionListeners {
   readonly interactionModeEnabled: boolean
   readonly onStateUpdate: (isActive: boolean) => void
-  readonly initialCyclesCount: number
 }
