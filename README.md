@@ -30,8 +30,8 @@ Version 2.0 considers the mistakes of first version and expands functionality, b
 <h3>Basic</h3>
 <h4>With context</h4>
 
-<p>Wrap the parent component with provider and supply it with parent view ref.</p>
-<p>The provider will attach all necessary props automatically to it's child component and does not require any configuration in basic setup.</p>
+<p>Wrap the component with provider. The provider will attach all necessary props automatically to it's child component and does not require any configuration in basic setup.</p>
+<p>Set up the useAppearObserver hook for the element you want to track and it pass the props returned by the hook. It attaches a ref to the component, based on which the measurement will run, and adds specific props to prevent the component from being collapsed on Android platform which prevents measurement and tracking.</p>
 
 ```ts
 const App = () => {
@@ -41,11 +41,7 @@ const App = () => {
     </AppearObserverProvider>
   )
 }
-```
 
-Set up the useAppearObserver hook for the element you want to track and it pass the props returned by the hook.
-It attaches a ref to the component, based on which the measurement will run, and adds specific props to prevent the component from being collapsed on Android platform.
-```ts
 const TrackedComponent = () => {
   const { refProps } = useAppearObserver({ onAppear: useCallback(() => console.log('Element has appeared!'), []) })
 
@@ -58,10 +54,14 @@ const TrackedComponent = () => {
 
 ```ts
 const App = () => {
-  const $scrollViewRef = useRef<ScrollView>(null)
+  const parentRefProps = useObservableTargetRef()
   const { interactionHandlers, interactionListeners } = useInteractionManager()
 
-  return <ScrollView ref={$scrollViewRef} { ...interactionHandlers }>{/* content */}</ScrollView>
+  return (
+    <ScrollView {...parentRefProps} { ...interactionHandlers }>
+      <TrackedComponent parentRef={parenRefProps.ref} interactionListeners={interactionListeners} />
+    </ScrollView>
+  )
 }
 
 const TrackedComponent = ({ parentRef, interactionListeners }: any) => {
