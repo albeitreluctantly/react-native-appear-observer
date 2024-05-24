@@ -92,12 +92,19 @@ const TestView = ({ onAppear, onDisappear }: any) => {
 }
 ```
 
-<h2>Options</h2>
+<h2>API</h2>
 
 <b>useAppearObserver</b>
 
 | Option                        | Description                                                                                                        | Default value |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- |
+| _elementRef_                  | An external ref to use instead of the one created by the hook. Use if you need to work with the tracked element by ref. | undefined     |
+| _parentRef_                   | An optional props for usage without context. Provide parent element ref directly to the hook, overrides the ref supplied by context. | undefined     |
+| _onAppear_                    | A callback that triggers when the element comes into visibily.                                                     | undefined     |
+| _onDisppear_                  | A callback that triggers when the element disappears.                                                              | undefined     |
+| _onEnable_                    | A callback that fires when tracking gets enabled.                                                                  | undefined     |
+| _onDisable_                   | A callback that fires when tracking gets disabled.                                                                | undefined     |
+| _enabled_                     | A flag which toggles tracking on and off. Useful when tracking needs to be reset, like in case with react navigation. | undefined     |
 | _visibilityThreshold_         | Defines what part of an element should be visible for it to trigger callback, from 0 to 1.                         | 0             |
 | _intervalDelay_               | Determines a delay in milliseconds between visibility check repetitions.                                           | 100           |
 | _recalculateParentBoundaries_ | Tells whether observer should measure parent element boundaries on every on every check or measure once and cache. | false         |
