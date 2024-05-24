@@ -1,8 +1,11 @@
 <h1>react-native-appear-observer</h1>
 
-A React Native library to detect element appearance on the screen
+> [!NOTE]
+> The updated documentation is in progress.
 
-> Version 2.1.0 bumps React Native version to 0.72.5. Version 2.0.3 updates minor dependency versions.
+<p>A React Native library that helps to track element's appearance on the screen.</p>
+<p>The detection mechanism is based on the loop that measures element's position on the screen and looks if it lies within the boundaries of it's parent.</p>
+<p>The library provides different optimization technics to reduce performance impact, among which the primary is an option to start the loop only when user interaction happens, after which the loop stops when the app goes idel.</p>
 
 <h2>Version 2.0</h2>
 
@@ -22,11 +25,13 @@ Version 2.0 considers the mistakes of first version and expands functionality, b
 - changes intersection detection algorithm, incorrect visibility threshold is fixed
 - drops support for useIsAppeared (so far)
 
-Proper documentation will be added later!
-
 <h2>Usage</h2>
 
-Wrap the parent component with provider and supply it with parent view ref.
+<h3>Basic</h3>
+<h4>With context</h4>
+
+<p>Wrap the parent component with provider and supply it with parent view ref.</p>
+<p>The provider will attach all necessary props automatically to it's child component and does not require any configuration in basic setup.</p>
 
 ```ts
 const App = () => {
@@ -38,17 +43,35 @@ const App = () => {
 }
 ```
 
-Or use useAppearObserver hook if you want to attach callback to visibility change without changing state.
+Set up the useAppearObserver hook for the element you want to track and it pass the props returned by the hook.
+It attaches a ref to the component, based on which the measurement will run, and adds specific props to prevent the component from being collapsed on Android platform.
+```ts
+const TrackedComponent = () => {
+  const { refProps } = useAppearObserver({ onAppear: useCallback(() => console.log('Element has appeared!'), []) })
+
+  return <View {...refProps} />
+}
+```
+
+<h4>Without context</h4>
+<p>Attach interaction handlers to the parent element, pass interaction listeners and parent ref to the tracked component.</p>
 
 ```ts
-const TestView = ({ onAppear, onDisappear }: any) => {
+const App = () => {
+  const $scrollViewRef = useRef<ScrollView>(null)
+  const { interactionHandlers, interactionListeners } = useInteractionManager()
+
+  return <ScrollView ref={$scrollViewRef} { ...interactionHandlers }>{/* content */}</ScrollView>
+}
+
+const TrackedComponent = ({ parentRef, interactionListeners }: any) => {
   const { refProps } = useAppearObserver({
-    elementRef,
-    onAppear,
-    onDisappear
+    parentRef,
+    interactionListeners,
+    onAppear: useCallback(() => console.log('Element has appeared!'), [])
   })
 
-  return <View {...refProps} style={elementStyle} />
+  return <View {...refProps} />
 }
 ```
 
