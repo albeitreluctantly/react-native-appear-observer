@@ -3,9 +3,24 @@
 > [!NOTE]
 > The updated documentation is in progress.
 
-<p>A React Native library that helps to track element's appearance on the screen.</p>
-<p>The detection mechanism is based on the loop that measures element's position on the screen and looks if it lies within the boundaries of it's parent.</p>
-<p>The library provides different optimization technics to reduce performance impact, among which the primary is an option to start the loop only when user interaction happens, after which the loop stops when the app goes idel.</p>
+<p>A React Native library that helps to track the appearance of an element on the screen.</p>
+
+<h2>Description</h2>
+<p>The library's functionality is based on the loop that measures element's position on the screen and looks if it lies within the boundaries of it's parent.</p>
+<p>The loop is intended to operate only when user interaction has happened. This is achieved by attaching interaction event listeners to the parent element relative to which the tracking is performed. When app goes idle the loop stops after a delay.</p>
+<p>API is designed in a way that provides easy basic usage without boilerplate and cluttering the code, for that all components try to make any attachments automatic.</p>
+<p>The basic intended usage implies setting a ScrollView or any List component as parent and tracking the element relative to it.</p>
+<p>This scenario is the most tested and the library attaches all relevant event handlers to the parent out of the box.</p>
+<p>But as well the library allows other types of usage and provides a wide variety of settings and customizations to cover different usage scenarios.</p>
+<p>Among the options are:</p>
+<ul>
+  <li>Ability to use with and without a context wrapping the parent element.</li>
+  <li>To set custom threshold for element's appearance, in percents of the element's size.</li>
+  <li>To record custom interactions as such that trigger the start of the tracking.</li>
+  <li>To disable interaction mode and run the loop indefinitely, as well as an ability to manually start and stop it.</li>
+  <li>Usage without a parent, with tracking relative to the screen, and an option to set static offsets from the screen boundaries.</li>
+  <li>Different optimizations like ability to set a custom delay between the loop cycles, disable parent boundaries recalculation.</li>
+</ul>
 
 <h2>Version 2.0</h2>
 
