@@ -1,4 +1,10 @@
-<h1>react-native-appear-observer</h1>
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/albeitreluctantly/react-native-appear-observer/assets/54374036/f721feff-c1a0-45ab-b3a7-ae43ed82e9df">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/albeitreluctantly/react-native-appear-observer/assets/54374036/a07a62fa-f68c-44c8-8052-3cc745cc901d">
+  <img alt="react-native-appear-observer" src="https://github.com/albeitreluctantly/react-native-appear-observer/assets/54374036/f721feff-c1a0-45ab-b3a7-ae43ed82e9df">
+</picture>
+</br>
+</br>
 
 <p>A React Native library that helps to track the appearance of an element on the screen.</p>
 
