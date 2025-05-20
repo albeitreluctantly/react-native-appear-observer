@@ -65,7 +65,7 @@ export const useObserverConfiguration = ({
         !parentRef &&
         (options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent)
           ? false
-          : enabled,
+          : enabled ?? true,
       interactionListeners: {
         onInteractionStart:
           interactionListeners?.onInteractionStart ?? onInteractionStart,
