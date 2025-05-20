@@ -56,7 +56,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
     [parentOffsets, windowWidth, windowHeight]
   )
 
-  const currentParentBoundaries = useRef<ElementBoundaries | undefined>()
+  const currentParentBoundaries = useRef<ElementBoundaries | undefined>(undefined)
 
   const elementIsCurrentlyVisible = useRef(false)
 
