@@ -9,7 +9,7 @@ export const useObserverInteractivityHandler = ({
 }: ObserverInteractivityHandlerProps) => {
   const isInitialMeasurement = useRef(true)
 
-  const idleModeTimeout = useRef<ReturnType<typeof setTimeout>>(null)
+  const idleModeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const resetTimeout = useCallback(() => {
     idleModeTimeout.current && clearTimeout(idleModeTimeout.current)
