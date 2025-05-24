@@ -64,4 +64,3 @@ buck-out/
 /vendor/bundle/
 node_modules
 coverage
-dist/
