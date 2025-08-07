@@ -135,6 +135,12 @@ const TrackedComponent = () => {
 ```
 
 <h3>Specific cases</h3>
+
+> [!IMPORTANT]
+><h4>Usage with FlatList</h4>
+><p>Set removeClippedSubviews to false for the list.</p>
+><p>Wrap it with a View and attach parentRef to the View, not the list.</p>
+
 <h4>Usage with react navigation</h4>
 <p>Set 'enabled' flag to isFocused from React Navigation. By default, the loop stops when the screen goes out of focus and won't start again otherwise, so it's necessary to start it manually.</p>
 <p>Depending on your needs, as an option, you may choose to pass <b>onDisappear</b> callback to the <b>onDisable</b> slot. This way the the hook will report disappearance when screen goes out of focus and the tracked element becomes not visible.</p>
