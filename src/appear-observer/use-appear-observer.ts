@@ -10,7 +10,8 @@ import {
   listenIterable,
   measureInWindow,
   useForceUpdate,
-  useImmediateReaction
+  useImmediateReaction,
+  isDetached
 } from '../core'
 import { useObservableTargetRef } from '../utils'
 import { AppearObserverProps } from './types'
@@ -41,7 +42,8 @@ export const useAppearObserver = (props: AppearObserverProps) => {
     optimizeOutOfScreen,
     parentOffsets,
     useScreenIfNoParent,
-    intervalDelay
+    intervalDelay,
+    checkDetachedElements
   } = options
 
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
@@ -56,7 +58,9 @@ export const useAppearObserver = (props: AppearObserverProps) => {
     [parentOffsets, windowWidth, windowHeight]
   )
 
-  const currentParentBoundaries = useRef<ElementBoundaries | undefined>(undefined)
+  const currentParentBoundaries = useRef<ElementBoundaries | undefined>(
+    undefined
+  )
 
   const elementIsCurrentlyVisible = useRef(false)
 
@@ -119,39 +123,53 @@ export const useAppearObserver = (props: AppearObserverProps) => {
 
         const elementMeasurements = await measureInWindow(elementRef.current)
 
-        const elementBoundaries = createElementBoundaries(elementMeasurements)
+        // Detached elements have 0 x and y positions, but width and height are defined
+        // Instead of always checking all elements for detached state and slowing down the script
+        // I'm checking only the potentially detached ones
+        const elementIsDetached =
+          checkDetachedElements &&
+          elementMeasurements.x === 0 &&
+          elementMeasurements.y === 0 &&
+          (await isDetached(elementRef.current))
 
-        let elementIsOutOfScreen = false
+        if (elementIsDetached) {
+          yield false
+          await delay(optimizeOutOfScreen ? intervalDelay * 2 : intervalDelay)
+        } else {
+          const elementBoundaries = createElementBoundaries(elementMeasurements)
 
-        if (recalculateParentBoundaries && optimizeOutOfScreen) {
-          const elementIntersectsWithWindow =
-            getIntersectionPercentage(elementBoundaries, windowBoundaries) > 0
+          let elementIsOutOfScreen = false
 
-          if (!elementIntersectsWithWindow) {
-            elementIsOutOfScreen = true
+          if (recalculateParentBoundaries && optimizeOutOfScreen) {
+            const elementIntersectsWithWindow =
+              getIntersectionPercentage(elementBoundaries, windowBoundaries) > 0
 
-            yield false
-            await delay(intervalDelay * 2)
+            if (!elementIntersectsWithWindow) {
+              elementIsOutOfScreen = true
+
+              yield false
+              await delay(intervalDelay * 2)
+            }
           }
-        }
 
-        if (!elementIsOutOfScreen) {
-          const parentBoundaries =
-            useScreenIfNoParent && !parentRef
-              ? windowBoundaries
-              : await getParentBoundaries()
+          if (!elementIsOutOfScreen) {
+            const parentBoundaries =
+              useScreenIfNoParent && !parentRef
+                ? windowBoundaries
+                : await getParentBoundaries()
 
-          if (!parentBoundaries) {
-            yield false
-          } else {
-            yield getIntersectionPercentage(
-              elementBoundaries,
-              parentBoundaries
-            ) >= visibilityThreshold
+            if (!parentBoundaries) {
+              yield false
+            } else {
+              yield getIntersectionPercentage(
+                elementBoundaries,
+                parentBoundaries
+              ) >= visibilityThreshold
+            }
           }
-        }
 
-        await delay(intervalDelay)
+          await delay(intervalDelay)
+        }
       }
     },
     [
@@ -164,7 +182,8 @@ export const useAppearObserver = (props: AppearObserverProps) => {
       windowBoundaries,
       getParentBoundaries,
       intervalDelay,
-      recalculateParentBoundaries
+      recalculateParentBoundaries,
+      checkDetachedElements
     ]
   )
 

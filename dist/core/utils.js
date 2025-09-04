@@ -39,6 +39,22 @@ export const measureInWindow = (element) => {
         }
     });
 };
+// Checks that element is detached from native hierarchy
+// They only way i found - measure returns empty result if the element is detached
+export const isDetached = (element) => {
+    return new Promise(resolve => {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-extra-semi
+            ;
+            element.measure(function () {
+                resolve(!arguments.length);
+            });
+        }
+        catch (e) {
+            resolve(true);
+        }
+    });
+};
 const fallbackMeasurements = {
     x: 0,
     y: 0,

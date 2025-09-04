@@ -42,7 +42,8 @@ export const useObserverConfiguration = ({ elementRef, parentRef, onAppear, onDi
                 defaultOptions.interactionModeEnabled,
             parentOffsets: requiredParentOffsets || parentOffsetsContext,
             optimizeOutOfScreen: options?.optimizeOutOfScreen ?? defaultOptions.optimizeOutOfScreen,
-            useScreenIfNoParent: options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent
+            useScreenIfNoParent: options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent,
+            checkDetachedElements: options?.checkDetachedElements ?? defaultOptions.checkDetachedElements
         }
     }), [
         elementRef,
@@ -80,5 +81,6 @@ const defaultOptions = {
         left: 0
     },
     optimizeOutOfScreen: true,
-    useScreenIfNoParent: false
+    useScreenIfNoParent: false,
+    checkDetachedElements: false
 };

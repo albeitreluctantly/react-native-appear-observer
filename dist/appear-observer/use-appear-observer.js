@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { createElementBoundaries, delay, elementHasZeroSize, getIntersectionPercentage, listenIterable, measureInWindow, useForceUpdate, useImmediateReaction } from '../core';
+import { createElementBoundaries, delay, elementHasZeroSize, getIntersectionPercentage, listenIterable, measureInWindow, useForceUpdate, useImmediateReaction, isDetached } from '../core';
 import { useObservableTargetRef } from '../utils';
 import { useObserverConfiguration } from './use-observer-configuration';
 import { useObserverInteractivityHandler } from './use-observer-interactivity-handler';
@@ -8,7 +8,7 @@ export const useAppearObserver = (props) => {
     const { elementRef: elementRefProp, parentRef, onAppear, onDisappear, onEnable, onDisable, enabled, interactionListeners, options } = useObserverConfiguration(props);
     const refProps = useObservableTargetRef(elementRefProp);
     const { ref: elementRef } = refProps;
-    const { interactionModeEnabled, recalculateParentBoundaries, visibilityThreshold, optimizeOutOfScreen, parentOffsets, useScreenIfNoParent, intervalDelay } = options;
+    const { interactionModeEnabled, recalculateParentBoundaries, visibilityThreshold, optimizeOutOfScreen, parentOffsets, useScreenIfNoParent, intervalDelay, checkDetachedElements } = options;
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const windowBoundaries = useMemo(() => ({
         top: 0 + parentOffsets.top,
@@ -60,28 +60,41 @@ export const useAppearObserver = (props) => {
             // makes observer do one cycle instead of two initially
             await delay(1);
             const elementMeasurements = await measureInWindow(elementRef.current);
-            const elementBoundaries = createElementBoundaries(elementMeasurements);
-            let elementIsOutOfScreen = false;
-            if (recalculateParentBoundaries && optimizeOutOfScreen) {
-                const elementIntersectsWithWindow = getIntersectionPercentage(elementBoundaries, windowBoundaries) > 0;
-                if (!elementIntersectsWithWindow) {
-                    elementIsOutOfScreen = true;
-                    yield false;
-                    await delay(intervalDelay * 2);
-                }
+            // Detached elements have 0 x and y positions, but width and height are defined
+            // Instead of always checking all elements for detached state and slowing down the script
+            // I'm checking only the potentially detached ones
+            const elementIsDetached = checkDetachedElements &&
+                elementMeasurements.x === 0 &&
+                elementMeasurements.y === 0 &&
+                (await isDetached(elementRef.current));
+            if (elementIsDetached) {
+                yield false;
+                await delay(optimizeOutOfScreen ? intervalDelay * 2 : intervalDelay);
             }
-            if (!elementIsOutOfScreen) {
-                const parentBoundaries = useScreenIfNoParent && !parentRef
-                    ? windowBoundaries
-                    : await getParentBoundaries();
-                if (!parentBoundaries) {
-                    yield false;
+            else {
+                const elementBoundaries = createElementBoundaries(elementMeasurements);
+                let elementIsOutOfScreen = false;
+                if (recalculateParentBoundaries && optimizeOutOfScreen) {
+                    const elementIntersectsWithWindow = getIntersectionPercentage(elementBoundaries, windowBoundaries) > 0;
+                    if (!elementIntersectsWithWindow) {
+                        elementIsOutOfScreen = true;
+                        yield false;
+                        await delay(intervalDelay * 2);
+                    }
                 }
-                else {
-                    yield getIntersectionPercentage(elementBoundaries, parentBoundaries) >= visibilityThreshold;
+                if (!elementIsOutOfScreen) {
+                    const parentBoundaries = useScreenIfNoParent && !parentRef
+                        ? windowBoundaries
+                        : await getParentBoundaries();
+                    if (!parentBoundaries) {
+                        yield false;
+                    }
+                    else {
+                        yield getIntersectionPercentage(elementBoundaries, parentBoundaries) >= visibilityThreshold;
+                    }
                 }
+                await delay(intervalDelay);
             }
-            await delay(intervalDelay);
         }
     }, [
         isObserving,
@@ -93,7 +106,8 @@ export const useAppearObserver = (props) => {
         windowBoundaries,
         getParentBoundaries,
         intervalDelay,
-        recalculateParentBoundaries
+        recalculateParentBoundaries,
+        checkDetachedElements
     ]);
     useEffect(() => {
         let stopObserving;

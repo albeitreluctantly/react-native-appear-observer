@@ -5,6 +5,7 @@ export declare const createElementBoundaries: ({ x, y, width, height }: ElementM
 export declare const getIntersectionPercentage: (element1: ElementBoundaries, element2: ElementBoundaries) => number;
 export declare const elementHasZeroSize: (elementMeasures: ElementMeasurements) => boolean;
 export declare const measureInWindow: (element: AnyElement | undefined | null) => Promise<ElementMeasurements>;
+export declare const isDetached: (element: AnyElement | undefined | null) => Promise<boolean>;
 export declare const isAsyncIterable: (value: unknown) => boolean;
 export declare const iterateAsyncIterable: <T>(generator: AsyncIterableIterator<T>, handler: (value: T) => void, stopper?: {
     stop: boolean;

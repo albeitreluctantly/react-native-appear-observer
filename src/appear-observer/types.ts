@@ -21,6 +21,7 @@ export interface AppearObserverOptions {
   readonly parentOffsets?: Partial<ElementBoundaries>
   readonly useScreenIfNoParent?: boolean
   readonly optimizeOutOfScreen?: boolean
+  readonly checkDetachedElements?: boolean
 }
 
 export interface ObserverInteractivityHandlerProps

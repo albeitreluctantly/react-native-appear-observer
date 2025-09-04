@@ -138,6 +138,9 @@ const TrackedComponent = () => {
 
 > [!IMPORTANT]
 ><h4>Usage with FlatList</h4>
+><b>Option1:</b>
+><p>Set checkDetachedElements to true.</p>
+><b>Option2:</b>
 ><p>Set removeClippedSubviews to false for the list.</p>
 ><p>Wrap it with a View and attach parentRef to the View, not the list.</p>
 
@@ -244,6 +247,7 @@ const App = () => {
 | _interactionModeEnabled_      | Makes the tracking loop fire only when user interaction has happened. When disabled, the loop runs indefinitely until stopped by <b>enabled</b> prop.   | true              |
 | _useScreenIfNoParent_         | Provides an option to track the element relative to screen instead of parent element. Only works if parent ref is not passed.                           | false             |
 | _optimizeOutOfScreen_         | Doubles the delay between loop cycles if the element is out of screen. A small optimization, candidate for improvement.                                 | true              |
+| _checkDetachedElements_         | Fixes element detection in FlatList with removeClippedSubviews set to true.                                 | false              |
 
 <h4>Returns</h4>
 
