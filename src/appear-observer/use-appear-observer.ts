@@ -80,7 +80,6 @@ export const useAppearObserver = (props: AppearObserverProps) => {
   const restartObserver = useCallback(() => {
     elementIsCurrentlyVisible.current = false
     currentParentBoundaries.current = undefined
-    wasEnabled.current = enabled
 
     resetInteractivityHandler()
     setIsObserving(enabled)
