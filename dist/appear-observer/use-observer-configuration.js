@@ -1,33 +1,30 @@
 import { useMemo } from 'react';
 import { useAppearObserverProvider } from '../appear-observer-provider';
 export const useObserverConfiguration = ({ elementRef, parentRef, onAppear, onDisappear, onEnable, onDisable, enabled, interactionListeners, options }) => {
-    const { parentRef: parentRefContext, interactionModeEnabled, parentOffsets: parentOffsetsContext, onInteractionStart, onInteractionEnd } = useAppearObserverProvider();
-    const parentOffsets = options?.parentOffsets;
-    const requiredParentOffsets = useMemo(() => {
-        if (!parentOffsets?.top === undefined &&
-            parentOffsets?.right === undefined &&
-            parentOffsets?.bottom === undefined &&
-            parentOffsets?.left === undefined) {
-            return undefined;
-        }
-        return defaultOptions.parentOffsets;
+    const { interactionModeEnabled, onInteractionStart, onInteractionEnd } = useAppearObserverProvider();
+    const parentOffsets = useMemo(() => {
+        const defaults = defaultOptions.parentOffsets;
+        const overrides = options?.parentOffsets;
+        return {
+            top: overrides?.top ?? defaults.top,
+            right: overrides?.right ?? defaults.right,
+            bottom: overrides?.bottom ?? defaults.bottom,
+            left: overrides?.left ?? defaults.left
+        };
     }, [
-        parentOffsets?.bottom,
-        parentOffsets?.left,
-        parentOffsets?.right,
-        parentOffsets?.top
+        options?.parentOffsets?.top,
+        options?.parentOffsets?.right,
+        options?.parentOffsets?.bottom,
+        options?.parentOffsets?.left
     ]);
     return useMemo(() => ({
         elementRef,
-        parentRef: parentRef || parentRefContext,
+        parentRef,
         onAppear,
         onDisappear,
         onEnable,
         onDisable,
-        enabled: !parentRef &&
-            (options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent)
-            ? false
-            : enabled ?? true,
+        enabled: enabled ?? true,
         interactionListeners: {
             onInteractionStart: interactionListeners?.onInteractionStart ?? onInteractionStart,
             onInteractionEnd: interactionListeners?.onInteractionEnd ?? onInteractionEnd
@@ -40,9 +37,8 @@ export const useObserverConfiguration = ({ elementRef, parentRef, onAppear, onDi
             interactionModeEnabled: options?.interactionModeEnabled ??
                 interactionModeEnabled ??
                 defaultOptions.interactionModeEnabled,
-            parentOffsets: requiredParentOffsets || parentOffsetsContext,
+            parentOffsets,
             optimizeOutOfScreen: options?.optimizeOutOfScreen ?? defaultOptions.optimizeOutOfScreen,
-            useScreenIfNoParent: options?.useScreenIfNoParent ?? defaultOptions.useScreenIfNoParent,
             checkDetachedElements: options?.checkDetachedElements ?? defaultOptions.checkDetachedElements
         }
     }), [
@@ -61,12 +57,10 @@ export const useObserverConfiguration = ({ elementRef, parentRef, onAppear, onDi
         options?.intervalDelay,
         options?.optimizeOutOfScreen,
         options?.recalculateParentBoundaries,
-        options?.useScreenIfNoParent,
         options?.visibilityThreshold,
-        parentOffsetsContext,
+        options?.checkDetachedElements,
         parentRef,
-        parentRefContext,
-        requiredParentOffsets
+        parentOffsets
     ]);
 };
 const defaultOptions = {
@@ -81,6 +75,5 @@ const defaultOptions = {
         left: 0
     },
     optimizeOutOfScreen: true,
-    useScreenIfNoParent: false,
     checkDetachedElements: false
 };

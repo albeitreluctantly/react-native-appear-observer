@@ -3,10 +3,6 @@ import { VoidCallback } from '../core'
 import { InteractionHandlers, InteractionManagerData } from './types'
 
 export const useInteractionManager = ({
-  onScroll,
-  onScrollBeginDrag,
-  onScrollEndDrag,
-  onMomentumScrollEnd,
   onTouchStart,
   onTouchMove,
   onTouchEnd,
@@ -47,14 +43,6 @@ export const useInteractionManager = ({
 
   const interactionHandlers: InteractionHandlers = useMemo(
     () => ({
-      onScroll: event => {
-        recordInteractionStart()
-        onScroll?.(event)
-      },
-      onScrollBeginDrag: event => {
-        recordInteractionStart()
-        onScrollBeginDrag?.(event)
-      },
       onTouchStart: event => {
         recordInteractionStart()
         onTouchStart?.(event)
@@ -62,15 +50,6 @@ export const useInteractionManager = ({
       onTouchMove: event => {
         recordInteractionStart()
         onTouchMove?.(event)
-      },
-
-      onScrollEndDrag: event => {
-        recordInteractionEnd()
-        onScrollEndDrag?.(event)
-      },
-      onMomentumScrollEnd: event => {
-        recordInteractionEnd()
-        onMomentumScrollEnd?.(event)
       },
       onTouchEnd: event => {
         recordInteractionEnd()
@@ -83,15 +62,11 @@ export const useInteractionManager = ({
     }),
     [
       recordInteractionStart,
-      onScroll,
-      onScrollBeginDrag,
       onTouchStart,
       onTouchMove,
       recordInteractionEnd,
-      onScrollEndDrag,
       onTouchEnd,
-      onTouchCancel,
-      onMomentumScrollEnd
+      onTouchCancel
     ]
   )
 

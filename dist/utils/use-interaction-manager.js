@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-export const useInteractionManager = ({ onScroll, onScrollBeginDrag, onScrollEndDrag, onMomentumScrollEnd, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel } = {}) => {
+export const useInteractionManager = ({ onTouchStart, onTouchMove, onTouchEnd, onTouchCancel } = {}) => {
     const interactionStartListeners = useRef(new Set()).current;
     const interactionEndListeners = useRef(new Set()).current;
     const onInteractionStart = useCallback((callback) => {
@@ -21,14 +21,6 @@ export const useInteractionManager = ({ onScroll, onScrollBeginDrag, onScrollEnd
         }
     }, [interactionEndListeners]);
     const interactionHandlers = useMemo(() => ({
-        onScroll: event => {
-            recordInteractionStart();
-            onScroll?.(event);
-        },
-        onScrollBeginDrag: event => {
-            recordInteractionStart();
-            onScrollBeginDrag?.(event);
-        },
         onTouchStart: event => {
             recordInteractionStart();
             onTouchStart?.(event);
@@ -36,14 +28,6 @@ export const useInteractionManager = ({ onScroll, onScrollBeginDrag, onScrollEnd
         onTouchMove: event => {
             recordInteractionStart();
             onTouchMove?.(event);
-        },
-        onScrollEndDrag: event => {
-            recordInteractionEnd();
-            onScrollEndDrag?.(event);
-        },
-        onMomentumScrollEnd: event => {
-            recordInteractionEnd();
-            onMomentumScrollEnd?.(event);
         },
         onTouchEnd: event => {
             recordInteractionEnd();
@@ -55,15 +39,11 @@ export const useInteractionManager = ({ onScroll, onScrollBeginDrag, onScrollEnd
         }
     }), [
         recordInteractionStart,
-        onScroll,
-        onScrollBeginDrag,
         onTouchStart,
         onTouchMove,
         recordInteractionEnd,
-        onScrollEndDrag,
         onTouchEnd,
-        onTouchCancel,
-        onMomentumScrollEnd
+        onTouchCancel
     ]);
     return {
         interactionHandlers,

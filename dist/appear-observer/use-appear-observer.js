@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { createElementBoundaries, delay, elementHasZeroSize, getIntersectionPercentage, listenIterable, measureInWindow, useForceUpdate, useImmediateReaction, isDetached } from '../core';
 import { useObservableTargetRef } from '../utils';
 import { useObserverConfiguration } from './use-observer-configuration';
@@ -8,7 +8,7 @@ export const useAppearObserver = (props) => {
     const { elementRef: elementRefProp, parentRef, onAppear, onDisappear, onEnable, onDisable, enabled, interactionListeners, options } = useObserverConfiguration(props);
     const refProps = useObservableTargetRef(elementRefProp);
     const { ref: elementRef } = refProps;
-    const { interactionModeEnabled, recalculateParentBoundaries, visibilityThreshold, optimizeOutOfScreen, parentOffsets, useScreenIfNoParent, intervalDelay, checkDetachedElements } = options;
+    const { interactionModeEnabled, recalculateParentBoundaries, visibilityThreshold, optimizeOutOfScreen, parentOffsets, intervalDelay, checkDetachedElements } = options;
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const windowBoundaries = useMemo(() => ({
         top: 0 + parentOffsets.top,
@@ -62,7 +62,8 @@ export const useAppearObserver = (props) => {
             // Detached elements have 0 x and y positions, but width and height are defined
             // Instead of always checking all elements for detached state and slowing down the script
             // I'm checking only the potentially detached ones
-            const elementIsDetached = checkDetachedElements &&
+            const elementIsDetached = Platform.OS === 'android' &&
+                checkDetachedElements &&
                 elementMeasurements.x === 0 &&
                 elementMeasurements.y === 0 &&
                 (await isDetached(elementRef.current));
@@ -82,7 +83,7 @@ export const useAppearObserver = (props) => {
                     }
                 }
                 if (!elementIsOutOfScreen) {
-                    const parentBoundaries = useScreenIfNoParent && !parentRef
+                    const parentBoundaries = !parentRef
                         ? windowBoundaries
                         : await getParentBoundaries();
                     if (!parentBoundaries) {
@@ -100,7 +101,6 @@ export const useAppearObserver = (props) => {
         elementRef,
         visibilityThreshold,
         optimizeOutOfScreen,
-        useScreenIfNoParent,
         parentRef,
         windowBoundaries,
         getParentBoundaries,

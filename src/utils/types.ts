@@ -1,18 +1,14 @@
-import { ScrollViewProps } from 'react-native'
+import { ViewProps } from 'react-native'
 import { VoidCallback } from '../core'
 
-type InteractionHandlerTypes =
-  | 'onScroll'
-  | 'onScrollBeginDrag'
-  | 'onScrollEndDrag'
+type TouchInteractionHandlerTypes =
   | 'onTouchStart'
   | 'onTouchEnd'
   | 'onTouchMove'
   | 'onTouchCancel'
-  | 'onMomentumScrollEnd'
 
 export type InteractionHandlers = Partial<
-  Pick<ScrollViewProps, InteractionHandlerTypes>
+  Pick<ViewProps, TouchInteractionHandlerTypes>
 >
 
 export interface InteractionListeners {
@@ -32,5 +28,5 @@ export interface InteractionManagerData {
 }
 
 export type ObservableElementProps = Partial<
-  Pick<ScrollViewProps, 'onLayout' | 'collapsable'>
+  Pick<ViewProps, 'onLayout' | 'collapsable'>
 >

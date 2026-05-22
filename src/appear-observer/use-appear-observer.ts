@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useWindowDimensions } from 'react-native'
+import { Platform, useWindowDimensions } from 'react-native'
 import {
   ElementBoundaries,
   VoidCallback,
@@ -41,7 +41,6 @@ export const useAppearObserver = (props: AppearObserverProps) => {
     visibilityThreshold,
     optimizeOutOfScreen,
     parentOffsets,
-    useScreenIfNoParent,
     intervalDelay,
     checkDetachedElements
   } = options
@@ -126,6 +125,7 @@ export const useAppearObserver = (props: AppearObserverProps) => {
         // Instead of always checking all elements for detached state and slowing down the script
         // I'm checking only the potentially detached ones
         const elementIsDetached =
+          Platform.OS === 'android' &&
           checkDetachedElements &&
           elementMeasurements.x === 0 &&
           elementMeasurements.y === 0 &&
@@ -152,10 +152,9 @@ export const useAppearObserver = (props: AppearObserverProps) => {
           }
 
           if (!elementIsOutOfScreen) {
-            const parentBoundaries =
-              useScreenIfNoParent && !parentRef
-                ? windowBoundaries
-                : await getParentBoundaries()
+            const parentBoundaries = !parentRef
+              ? windowBoundaries
+              : await getParentBoundaries()
 
             if (!parentBoundaries) {
               yield false
@@ -176,7 +175,6 @@ export const useAppearObserver = (props: AppearObserverProps) => {
       elementRef,
       visibilityThreshold,
       optimizeOutOfScreen,
-      useScreenIfNoParent,
       parentRef,
       windowBoundaries,
       getParentBoundaries,

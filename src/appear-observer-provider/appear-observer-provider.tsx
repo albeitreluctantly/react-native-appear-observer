@@ -1,111 +1,43 @@
-import {
-  Children,
-  RefObject,
-  cloneElement,
-  createContext,
-  forwardRef,
-  isValidElement,
-  useContext,
-  useMemo
-} from 'react'
-import { AnyElement, isFunction, noop } from '../core'
-import { useInteractionManager, useObservableTargetRef } from '../utils'
+import { createContext, useContext, useMemo } from 'react'
+import { View } from 'react-native'
+import { noop } from '../core'
+import { useInteractionManager } from '../utils'
 import {
   AppearObserverProviderProps,
   AppearObserverProviderValue
 } from './types'
 
-const defaultOffsets = {
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0
-}
-
 export const AppearObserverContext = createContext<AppearObserverProviderValue>(
   {
-    parentRef: undefined,
     interactionModeEnabled: true,
-    parentOffsets: defaultOffsets,
     onInteractionStart: () => noop,
     onInteractionEnd: () => noop
   }
 )
 
-export const AppearObserverProvider = forwardRef<
-  AnyElement,
-  AppearObserverProviderProps
->(
-  (
-    {
-      enableInteractionMode = true,
-      children,
-      onLayout = noop,
-      collapsable = false,
-      offsets,
-      ...interactionHandlerProps
-    }: AppearObserverProviderProps,
-    ref
-  ) => {
-    const { interactionHandlers, interactionListeners, interactionRecorders } =
-      useInteractionManager(interactionHandlerProps)
+export const AppearObserverProvider = ({
+  enableInteractionMode = true,
+  children
+}: AppearObserverProviderProps) => {
+  const { interactionHandlers, interactionListeners } = useInteractionManager()
 
-    const refProps = useObservableTargetRef(ref)
+  const value: AppearObserverProviderValue = useMemo(
+    () => ({
+      interactionModeEnabled: enableInteractionMode,
+      ...interactionListeners
+    }),
+    [enableInteractionMode, interactionListeners]
+  )
 
-    const basicProps = {
-      ...refProps,
-      onLayout,
-      collapsable
-    }
+  const touchProps = enableInteractionMode ? interactionHandlers : {}
 
-    const props = enableInteractionMode
-      ? {
-          ...interactionHandlers,
-          ...basicProps
-        }
-      : basicProps
-
-    let childComponent = children
-
-    if (isFunction(childComponent)) {
-      childComponent = childComponent(props, interactionRecorders)
-    } else {
-      const child = Children.only(children)
-
-      if (isValidElement(child)) {
-        childComponent = cloneElement(child, props)
-      }
-    }
-
-    const value: AppearObserverProviderValue = useMemo(
-      () => ({
-        parentRef: refProps.ref as RefObject<AnyElement>,
-        interactionModeEnabled: enableInteractionMode,
-        parentOffsets: {
-          top: offsets?.top ?? defaultOffsets.top,
-          right: offsets?.right ?? defaultOffsets.right,
-          bottom: offsets?.bottom ?? defaultOffsets.bottom,
-          left: offsets?.left ?? defaultOffsets.left
-        },
-        ...interactionListeners
-      }),
-      [
-        refProps.ref,
-        enableInteractionMode,
-        interactionListeners,
-        offsets?.top,
-        offsets?.right,
-        offsets?.bottom,
-        offsets?.left
-      ]
-    )
-
-    return (
-      <AppearObserverContext.Provider value={value}>
-        {childComponent}
-      </AppearObserverContext.Provider>
-    )
-  }
-)
+  return (
+    <AppearObserverContext.Provider value={value}>
+      <View style={{ flex: 1 }} {...touchProps}>
+        {children}
+      </View>
+    </AppearObserverContext.Provider>
+  )
+}
 
 export const useAppearObserverProvider = () => useContext(AppearObserverContext)
